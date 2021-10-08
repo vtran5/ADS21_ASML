@@ -1,6 +1,5 @@
 sort
 	Sluice = struct Sluice_1 | Sluice_2;
-	Wafer = struct Wafer_In?isWafer_In | Wafer_Out?isWafer_Out | No_Wafer?isNo_Wafer;
 	Robot = struct Robot_1?isRobot_1 | Robot_2?isRobot_2 | Robot_3?isRobot_3;
 	Location = struct Location_InRack | Location_OutRack | Location_Sluice_1 | Location_Sluice_2 | Location_InWaitRack | Location_OutWaitRack | Location_IPU;
 	OrderRobot = struct OrderRobot (robot: Robot, location : Location);
@@ -51,15 +50,25 @@ proc
 		(
 		(isRobot_1(r)) -> (
 			R_Robot_Pick_Up(r, Location_InRack).R_Robot_Put_Down(r,Location_Sluice_1)
-			+ R_Robot_Pick_Up(r, Location_Sluice_1).R_Robot_Put_Down(r, Location_OutRack))
+			+ R_Robot_Pick_Up(r, Location_Sluice_2).R_Robot_Put_Down(r, Location_OutRack)) +
+		(isRobot_2(r)) -> (
+			R_Robot_Pick_Up(r, Location_Sluice_1).R_Robot_Put_Down(r, Location_Sluice_2))
 		).Physical_Robot(r);
 
 	%s1_stat expresses the status of sluice 1: true is occupied, false is not occupied
-	Robot_Controller(r : Robot, s: Sluice, s1_stat: Bool) =
+	Robot_Controller(s1_stat: Bool, s2_stat: Bool) =
 		(
-		(isRobot_1(r)) ->(
-			(s1_stat) -> S_Open_Outside_Door(s).S_Robot_Pick_Up(r, Location_Sluice_1).S_Robot_Put_Down(r,Location_OutRack).S_Close_Outside_Door(s).Robot_Controller(r, s, false)
-			<> S_Open_Inside_Door(s).S_Robot_Pick_Up(r, Location_InRack).S_Robot_Put_Down(r,Location_Sluice_1).S_Close_Inside_Door(s).Robot_Controller(r,s,true))
+		%(isRobot_1(r)) -> (
+			((!s1_stat) -> S_Open_Outside_Door(Sluice_1).S_Robot_Pick_Up(Robot_1,Location_InRack).
+				S_Robot_Put_Down(Robot_1,Location_Sluice_1).S_Close_Outside_Door(Sluice_1).Robot_Controller(true, s2_stat)) +
+			((s2_stat) -> S_Open_Outside_Door(Sluice_2).S_Robot_Pick_Up(Robot_1,Location_Sluice_2).
+				S_Robot_Put_Down(Robot_1,Location_OutRack).S_Close_Outside_Door(Sluice_2).Robot_Controller(s1_stat, false)) +
+		%				) +			
+		%(isRobot_2(r)) -> (
+			((s1_stat && (!s2_stat)) -> S_Open_Inside_Door(Sluice_1).S_Robot_Pick_Up(Robot_2,Location_Sluice_1).
+				S_Open_Inside_Door(Sluice_2).S_Robot_Put_Down(Robot_2, Location_Sluice_2).
+				S_Close_Inside_Door(Sluice_1).S_Close_Inside_Door(Sluice_2).Robot_Controller(false,true))
+		%				)
 		);
 
 init
@@ -69,5 +78,6 @@ init
 			{ S_Open_Inside_Door|R_Open_Inside_Door -> Open_Inside_Door, S_Close_Inside_Door|R_Close_Inside_Door -> Close_Inside_Door,
 			 S_Open_Outside_Door|R_Open_Outside_Door -> Open_Outside_Door, S_Close_Outside_Door|R_Close_Outside_Door -> Close_Outside_Door,
 			 S_Robot_Pick_Up|R_Robot_Pick_Up -> Pick_Up, S_Robot_Put_Down|R_Robot_Put_Down -> Put_Down},
-		Physical_Sluice(Sluice_1)||Physical_Robot(Robot_1)||Robot_Controller(Robot_1,Sluice_1,false)
+		Physical_Sluice(Sluice_1)||Physical_Sluice(Sluice_2)||Physical_Robot(Robot_1)||Physical_Robot(Robot_2)||Robot_Controller(false,false)
+			%||Robot_Controller(Robot_2,false,false)
 	));
