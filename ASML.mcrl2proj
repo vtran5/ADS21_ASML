@@ -1,8 +1,7 @@
 <root>
  <spec>ASML_spec.mcrl2</spec>
  <properties>
-  <property>Requirement 1</property>
-  <property>DeadLock Free</property>
+  <property>DeadLockFree</property>
   <property>System most eventually always move forward</property>
  </properties>
 </root>
