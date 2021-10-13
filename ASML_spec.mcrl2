@@ -296,14 +296,26 @@ proc
 				+ (oc_sluice_2 == Post && sluice_2_state == OutsideOpen) -> (
 					S_Robot_Pick_Up(Robot_1, Location_Sluice_2).Controller(op, sluice_1_state, sluice_2_state, Post, oc_robot_2, oc_robot_3, oc_sluice_1, None, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
 				)
+				+ (oc_sluice_2 == Pre && sluice_2_state == OutsideOpen 
+					&& (
+					(oc_robot_2 != None && oc_InWaitRack != None && oc_robot_3 != None) || (oc_robot_2 != None && oc_InWaitRack != None && oc_IPU != None)
+					|| (oc_robot_2 != None && oc_IPU != None && oc_OutWaitRack != None) || (oc_InWaitRack != None && oc_IPU != None && oc_OutWaitRack != None)
+					)) -> (
+					S_Robot_Pick_Up(Robot_1, Location_Sluice_2).Controller(op, sluice_1_state, sluice_2_state, Pre, oc_robot_2, oc_robot_3, oc_sluice_1, None, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+				)
 			)
 			+ (oc_robot_1 == Pre) -> (
 				(oc_sluice_2 != None) -> (
 					S_Robot_Put_Down(Robot_1, Location_InRack).Controller(op, sluice_1_state, sluice_2_state, None, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
 				)
-				+ (oc_sluice_2 == None && sluice_2_state == OutsideOpen && oc_robot_2 != Post && !((oc_robot_2 == Pre || oc_InWaitRack == Pre) && (oc_InWaitRack == Pre || oc_robot_3 == Pre) && (oc_robot_3 != None || oc_IPU != None) && (oc_robot_3 == Post || oc_OutWaitRack == Post) && (oc_OutWaitRack == Post || oc_robot_2 == Post))) -> ( %Not already 3 Wafers in the machine and robot_2 is not trying to put a wafer away
+				+ (oc_sluice_2 == None && sluice_2_state == OutsideOpen && oc_robot_2 != Post && 
+					!(
+					(oc_robot_2 != None && oc_InWaitRack != None && oc_robot_3 != None) || (oc_robot_2 != None && oc_InWaitRack != None && oc_IPU != None)
+					|| (oc_robot_2 != None && oc_IPU != None && oc_OutWaitRack != None) || (oc_InWaitRack != None && oc_IPU != None && oc_OutWaitRack != None)
+					)
+				) -> ( %Not already 3 Wafers in the machine and robot_2 is not trying to put a wafer away
 					S_Robot_Put_Down(Robot_1, Location_Sluice_2).Controller(op, sluice_1_state, sluice_2_state, None, oc_robot_2, oc_robot_3, oc_sluice_1, Pre, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
-				)
+					)
 			)
 			+ (oc_robot_1 == Post) -> (
 				S_Robot_Put_Down(Robot_1, Location_OutRack).Controller(op, sluice_1_state, sluice_2_state, None, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
@@ -351,12 +363,24 @@ proc
 				+ (oc_sluice_1 == Post && sluice_1_state == OutsideOpen) -> (
 					S_Robot_Pick_Up(Robot_1, Location_Sluice_1).Controller(op, sluice_1_state, sluice_2_state, Post, oc_robot_2, oc_robot_3, None, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
 				)
+				+ (oc_sluice_1 == Pre && sluice_1_state == OutsideOpen 
+					&& (
+					(oc_robot_2 != None && oc_InWaitRack != None && oc_robot_3 != None) || (oc_robot_2 != None && oc_InWaitRack != None && oc_IPU != None)
+					|| (oc_robot_2 != None && oc_IPU != None && oc_OutWaitRack != None) || (oc_InWaitRack != None && oc_IPU != None && oc_OutWaitRack != None)
+					)) -> (
+					S_Robot_Pick_Up(Robot_1, Location_Sluice_1).Controller(op, sluice_1_state, sluice_2_state, Pre, oc_robot_2, oc_robot_3, None, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+				)
 			)
 			+ (oc_robot_1 == Pre) -> (
 				(oc_sluice_1 != None) -> (
 					S_Robot_Put_Down(Robot_1, Location_InRack).Controller(op, sluice_1_state, sluice_2_state, None, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
 				)
-				+ (oc_sluice_1 == None && sluice_1_state == OutsideOpen && oc_robot_2 != Post && !((oc_robot_2 == Pre || oc_InWaitRack == Pre) && (oc_InWaitRack == Pre || oc_robot_3 == Pre) && (oc_robot_3 != None || oc_IPU != None) && (oc_robot_3 == Post || oc_OutWaitRack == Post) && (oc_OutWaitRack == Post || oc_robot_2 == Post))) -> ( %Not already 3 Wafers in the machine and robot_2 is not trying to put a wafer away
+				+ (oc_sluice_1 == None && sluice_1_state == OutsideOpen && oc_robot_2 != Post && 
+					!(
+					(oc_robot_2 != None && oc_InWaitRack != None && oc_robot_3 != None) || (oc_robot_2 != None && oc_InWaitRack != None && oc_IPU != None)
+					|| (oc_robot_2 != None && oc_IPU != None && oc_OutWaitRack != None) || (oc_InWaitRack != None && oc_IPU != None && oc_OutWaitRack != None)
+					)
+				) -> ( %Not already 3 Wafers in the machine and robot_2 is not trying to put a wafer away
 					S_Robot_Put_Down(Robot_1, Location_Sluice_1).Controller(op, sluice_1_state, sluice_2_state, None, oc_robot_2, oc_robot_3, Pre, None, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
 				)
 			)

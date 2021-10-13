@@ -3,5 +3,6 @@
  <properties>
   <property>DeadLockFree</property>
   <property>System most eventually always move forward</property>
+  <property>Doorsnotopen</property>
  </properties>
 </root>
