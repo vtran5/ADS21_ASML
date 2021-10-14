@@ -6,7 +6,7 @@ sort
 	Location = struct Location_InRack | Location_OutRack | Location_Sluice_1 | Location_Sluice_2 | Location_InWaitRack | Location_OutWaitRack | Location_IPU;
 	SluiceState = struct InsideOpen | OutsideOpen | Vacuum | NoVacuum | UnknownSluice;
 	WaferState = struct None | Pre | Post | UnknownWafer;
-	IPUState = struct On | Off;
+	IPUState = struct On | Off | UnknownIPU;
 
 act
 	% Sluice Controlls
@@ -175,10 +175,10 @@ act
 
 
 
-	% IPU Controlls
-	IPU_On			: IPU; % Communication of multi-action
+	% IPU Controlls (Internal)
+	Controller_IPU_On			: IPU; % Communication of multi-action
 						   %  S_IPU_On | R_IPU_On
-	IPU_Off			: IPU; % Communication of multi-action
+	Controller_IPU_Off			: IPU; % Communication of multi-action
 						   %  S_IPU_Off | R_IPU_Off
 	
 	S_IPU_On		: IPU; % Action taken by the Controller telling the IPU i to turn on.
@@ -190,6 +190,25 @@ act
 						   %  Communication with S_IPU_On(i) results in IPU_On(i)
 	R_IPU_Off		: IPU; % Action taken by the IPU i to turn on.
 						   %  Communication with S_IPU_Off(i) results in IPU_Off(i)
+
+	IPU_IPU_On			: IPU;
+	IPU_IPU_Off			: IPU;
+
+	S_ACK_IPU_On		: IPU; % Action taken by the Controller telling the IPU i to turn on.
+						   %  Communication with R_IPU_On(i) results in IPU_On(i)
+	S_ACK_IPU_Off		: IPU; % Action taken by the Controller telling the IPU i to turn off.
+						   %  Communication with R_IPU_Off(i) results in IPU_Off(i)
+
+	R_ACK_IPU_On		: IPU; % Action taken by the IPU i to turn on.
+						   %  Communication with S_IPU_On(i) results in IPU_On(i)
+	R_ACK_IPU_Off		: IPU; % Action taken by the IPU i to turn on.
+						   %  Communication with S_IPU_Off(i) results in IPU_Off(i)
+
+	% IPU Controlls (External)
+	P_IPU_On			: IPU;
+	P_IPU_Off			: IPU;
+
+
 
 
 proc
@@ -240,31 +259,35 @@ proc
 			)
 		).Physical_Robot(r);
 
-	Physical_IPU(i : IPU) =
+	Physical_IPU(i : IPU, TurnedOn : Bool) =
 	% Process that represents the Physical IPU
-		(
-			R_IPU_On(i).R_IPU_Off(i)
-		).Physical_IPU(i);
+		(!TurnedOn) -> (
+			R_IPU_On(i).P_IPU_On(i).S_ACK_IPU_On(i).Physical_IPU(i, true)
+		)
+		+ (TurnedOn) -> (
+			R_IPU_Off(i).P_IPU_Off(i).S_ACK_IPU_Off(i).Physical_IPU(i, false)
+		)
+		;
 
 	Controller(op: Operation_Mode, sluice_1_state: SluiceState, sluice_2_state: SluiceState, oc_robot_1: WaferState, oc_robot_2: WaferState, oc_robot_3: WaferState, oc_sluice_1: WaferState, oc_sluice_2: WaferState, oc_InWaitRack: WaferState, oc_OutWaitRack: WaferState, oc_IPU: WaferState, IPU_state: IPUState) = 
 	% Process that represents the controller that gives commands to all the different components (Sluices, Robots and IPU)
 		(op == Normal) -> (
 		% System is in Normal Operating modus)
-			(sluice_1_state == NoVacuum) -> (
+			(sluice_1_state == NoVacuum && sluice_2_state != UnknownSluice) -> (
 			% There is No Vacuum inside Sluice_1 so the outside door can be opened or a Vacuum can be created
 				S_Open_Outside_Door(Sluice_1).Controller(op, UnknownSluice, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
 				+ S_Create_Vacuum(Sluice_1).Controller(op, UnknownSluice, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
 			)
-			+ (sluice_1_state == OutsideOpen) -> (
+			+ (sluice_1_state == OutsideOpen && sluice_2_state != UnknownSluice) -> (
 			% The outside Door of Sluice_1 is currently open so it can be closed
 				S_Close_Outside_Door(Sluice_1).Controller(op, UnknownSluice, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
 			)
-			+ (sluice_1_state == Vacuum) -> (
+			+ (sluice_1_state == Vacuum && sluice_2_state != UnknownSluice) -> (
 			% There is a Vacuum inside Sluice_1 so the inside door can be opened or the Vacuum can be undone
 				S_Open_Inside_Door(Sluice_1).Controller(op, UnknownSluice, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
 				+ S_Undo_Vacuum(Sluice_1).Controller(op, UnknownSluice, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
 			)
-			+ (sluice_1_state == InsideOpen) -> (
+			+ (sluice_1_state == InsideOpen && sluice_2_state != UnknownSluice) -> (
 				S_Close_Inside_Door(Sluice_1).Controller(op, UnknownSluice, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
 			)
 			+ (sluice_1_state == UnknownSluice) -> (
@@ -281,18 +304,18 @@ proc
 				+ R_ACK_Create_Vacuum(Sluice_1, false).Controller(Sluice_1_Broken, NoVacuum, sluice_2_state,oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
 				+ R_ACK_Undo_Vacuum(Sluice_1, false).Controller(Sluice_1_Broken, Vacuum, sluice_2_state,oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state) 
 			)
-			+ (sluice_2_state == NoVacuum) -> (
+			+ (sluice_2_state == NoVacuum && sluice_1_state != UnknownSluice) -> (
 				S_Open_Outside_Door(Sluice_2).Controller(op, sluice_1_state, UnknownSluice, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
 				+ S_Create_Vacuum(Sluice_2).Controller(op, sluice_1_state, UnknownSluice, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
 			)
-			+ (sluice_2_state == OutsideOpen) -> (
+			+ (sluice_2_state == OutsideOpen && sluice_1_state != UnknownSluice) -> (
 				S_Close_Outside_Door(Sluice_2).Controller(op, sluice_1_state, UnknownSluice, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
 			)
-			+ (sluice_2_state == Vacuum) -> (
+			+ (sluice_2_state == Vacuum && sluice_1_state != UnknownSluice) -> (
 				S_Open_Inside_Door(Sluice_2).Controller(op, sluice_1_state, UnknownSluice, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
 				+ S_Undo_Vacuum(Sluice_2).Controller(op, sluice_1_state, UnknownSluice, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
 			)
-			+ (sluice_2_state == InsideOpen) -> (
+			+ (sluice_2_state == InsideOpen && sluice_1_state != UnknownSluice) -> (
 				S_Close_Inside_Door(Sluice_2).Controller(op, sluice_1_state, UnknownSluice, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
 			)
 			+ (sluice_2_state == UnknownSluice) -> (
@@ -510,27 +533,31 @@ proc
 		)
 		% IPU is not affected by the sluices breaking for its behaviour
 		+ (oc_IPU == Pre && IPU_state == Off) -> (
-			S_IPU_On(IPU_1).Controller(op, sluice_1_state, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, Pre, On)
+			S_IPU_On(IPU_1).Controller(op, sluice_1_state, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, Pre, UnknownIPU)
 		)
 		+ (oc_IPU == Pre && IPU_state == On) -> (
-			S_IPU_Off(IPU_1).Controller(op, sluice_1_state, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, Post, Off)
+			S_IPU_Off(IPU_1).Controller(op, sluice_1_state, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, Pre, UnknownIPU)
+		)
+		+ (IPU_state == UnknownIPU) -> (
+			S_ACK_IPU_On(IPU_1).Controller(op, sluice_1_state, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, Pre, On)
+			+ S_ACK_IPU_Off(IPU_1).Controller(op, sluice_1_state, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, Post, Off)
 		)
 		;
 
 
 
 init
-	hide({Controller_Open_Inside_Door, Controller_Open_Outside_Door, Controller_Close_Inside_Door, Controller_Close_Outside_Door,
-		Controller_Create_Vacuum, Controller_Undo_Vacuum,
-		Sluice_Open_Inside_Door, Sluice_Open_Outside_Door, Sluice_Close_Inside_Door, Sluice_Close_Outside_Door,
-		Sluice_Create_Vacuum, Sluice_Undo_Vacuum, Break, Fix, IPU_On, IPU_Off},
+%	hide({Controller_Open_Inside_Door, Controller_Open_Outside_Door, Controller_Close_Inside_Door, Controller_Close_Outside_Door,
+%		Controller_Create_Vacuum, Controller_Undo_Vacuum,
+%		Sluice_Open_Inside_Door, Sluice_Open_Outside_Door, Sluice_Close_Inside_Door, Sluice_Close_Outside_Door,
+%		Sluice_Create_Vacuum, Sluice_Undo_Vacuum, Break, Fix, Controller_IPU_On, Controller_IPU_Off, IPU_IPU_Off, IPU_IPU_On},
 		allow(
 		% Only Multi-actions are allowed
 		{Controller_Open_Inside_Door, Controller_Open_Outside_Door, Controller_Close_Inside_Door, Controller_Close_Outside_Door,
 		Controller_Create_Vacuum, Controller_Undo_Vacuum,
 		Sluice_Open_Inside_Door, Sluice_Open_Outside_Door, Sluice_Close_Inside_Door, Sluice_Close_Outside_Door,
 		Sluice_Create_Vacuum, Sluice_Undo_Vacuum, P_Open_Inside_Door, P_Close_Inside_Door, P_Open_Outside_Door, P_Close_Outside_Door, P_Create_Vacuum, 
-		P_Undo_Vacuum, P_Break, P_Fix, Break, Fix, Robot_Pick_Up, Robot_Put_Down, IPU_On, IPU_Off},
+		P_Undo_Vacuum, P_Break, P_Fix, Break, Fix, Robot_Pick_Up, Robot_Put_Down, Controller_IPU_On, Controller_IPU_Off, IPU_IPU_On, IPU_IPU_Off, P_IPU_On, P_IPU_Off},
 			comm(
 				{ 
 				S_Open_Inside_Door|R_Open_Inside_Door -> Controller_Open_Inside_Door,
@@ -549,15 +576,18 @@ init
 				S_Fix|R_Fix -> Fix,
 				S_Robot_Pick_Up|R_Robot_Pick_Up -> Robot_Pick_Up,
 				S_Robot_Put_Down|R_Robot_Put_Down -> Robot_Put_Down,
-				S_IPU_On|R_IPU_On -> IPU_On,
-				S_IPU_Off|R_IPU_Off	-> IPU_Off
+				S_IPU_On|R_IPU_On -> Controller_IPU_On,
+				S_IPU_Off|R_IPU_Off	-> Controller_IPU_Off,
+				S_ACK_IPU_On|R_ACK_IPU_On -> IPU_IPU_On,
+				S_ACK_IPU_Off|R_ACK_IPU_Off -> IPU_IPU_Off
+				
 				},
-				Physical_Sluice(Sluice_1, false, NoVacuum) || Physical_Sluice(Sluice_2, false, NoVacuum) || Physical_IPU(IPU_1) 
+				Physical_Sluice(Sluice_1, false, NoVacuum) || Physical_Sluice(Sluice_2, false, NoVacuum) || Physical_IPU(IPU_1, false) 
 				|| Physical_Robot(Robot_1) || Physical_Robot(Robot_2) || Physical_Robot(Robot_3) 
 				|| Controller(Normal, NoVacuum, NoVacuum, None, None, None, None, None, None, None, None, Off)
-%				Physical_Sluice(Sluice_1, false, NoVacuum) || Physical_Sluice(Sluice_2, false, NoVacuum) || Physical_Robot(Robot_1) || Controller(Normal, NoVacuum, NoVacuum, None, None, None, None, None, None, None, None, Off)
+%				Physical_Sluice(Sluice_1, false, NoVacuum) || Physical_Sluice(Sluice_2, false, NoVacuum) || Controller(Normal, NoVacuum, NoVacuum, None, None, None, None, None, None, None, None, Off)
 %				Physical_Sluice(Sluice_1, false, NoVacuum) || Controller(Normal, NoVacuum, NoVacuum, None, None, None, None, None, None, None, None, Off)
 			)
 		)
-	)
+%	)
 ;
