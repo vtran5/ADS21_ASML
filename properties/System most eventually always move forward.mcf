@@ -1,0 +1,1 @@
+[true*.Robot_Pick_Up(Robot_1, Location_InRack).!Robot_Put_Down(Robot_1, Location_Sluice_1)*.Robot_Put_Down(Robot_1, Location_Sluice_1)] true
