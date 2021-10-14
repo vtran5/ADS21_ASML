@@ -11,13 +11,13 @@ sort
 act
 	% Sluice Controlls
 	% Door Controlls communication (Internal)
-	Open_Inside_Door		: Sluice; % Communication of multi-action
+	Controller_Open_Inside_Door		: Sluice; % Communication of multi-action
 									  %  S_Open_Inside_Door | R_Open_Inside_Door
-	Open_Outside_Door		: Sluice; % Communication of multi-action
+	Controller_Open_Outside_Door		: Sluice; % Communication of multi-action
 									  %  S_Open_Outside_Door | R_Open_Outside_Door
-	Close_Inside_Door		: Sluice; % Communication of multi-action
+	Controller_Close_Inside_Door		: Sluice; % Communication of multi-action
 									  %  S_Close_Inside_Door | R_Close_Inside_Door
-	Close_Outside_Door		: Sluice; % Communication of multi-action
+	Controller_Close_Outside_Door		: Sluice; % Communication of multi-action
 									  %  S_Close_Outside_Door | R_Close_Outside_Door
 
 	S_Open_Inside_Door		: Sluice; % Action taken by the Controller telling the
@@ -55,6 +55,11 @@ act
 									  %  Communication with S_Close_Outside_Door(s)
 									  %  results in Close_Outside_Door(s)
 
+	Sluice_Open_Inside_Door		: Sluice # Bool;
+	Sluice_Open_Outside_Door		: Sluice # Bool;
+	Sluice_Close_Inside_Door		: Sluice # Bool;
+	Sluice_Close_Outside_Door		: Sluice # Bool;
+
 	S_ACK_Open_Inside_Door	: Sluice # Bool; % Action taken by the Physical Sluice s telling
 									  %  the controller that it has opened its inside door.
 	S_ACK_Open_Outside_Door	: Sluice # Bool;
@@ -77,9 +82,9 @@ act
 
 	% Vacuum Pump Controlls (Internal)
 
-	Create_Vacuum			: Sluice; % Communication of multi-action
+	Controller_Create_Vacuum			: Sluice; % Communication of multi-action
 									  %  S_Create_Vacuum | R_Create_Vacuum
-	Undo_Vacuum				: Sluice; % Communication of multi-action
+	Controller_Undo_Vacuum				: Sluice; % Communication of multi-action
 									  %  S_Undo_Vacuum | R_Undo_Vacuum
 
 	S_Create_Vacuum			: Sluice; % Action taken by the Controller telling the
@@ -99,6 +104,11 @@ act
 									  %  undo its vacuum.
 									  %  Communication with S_Undo_Vacuum(s)
 									  %  results in Undo_Vacuum(s)
+
+	Sluice_Create_Vacuum			: Sluice # Bool; % Communication of multi-action
+									  %  S_Create_Vacuum | R_Create_Vacuum
+	Sluice_Undo_Vacuum				: Sluice # Bool; % Communication of multi-action
+									  %  S_Undo_Vacuum | R_Undo_Vacuum
 
 	S_ACK_Create_Vacuum			: Sluice # Bool;
 	S_ACK_Undo_Vacuum			: Sluice # Bool;
@@ -195,7 +205,7 @@ proc
 				+ R_Create_Vacuum(s).(P_Create_Vacuum(s).S_ACK_Create_Vacuum(s,true).Physical_Sluice(s,false,Vacuum) + S_Break(s).S_ACK_Create_Vacuum(s, false).Physical_Sluice(s, true, state))
 			)
 			+ (state == OutsideOpen) -> (
-				R_Close_Outside_Door(s).(P_Close_Outside_Door(s).S_ACK_Close_Outside_Door(s, true).Physical_Sluice(s,false, NoVacuum) + S_Break(s).S_ACK_Open_Outside_Door(s, false).Physical_Sluice(s,true,state))
+				R_Close_Outside_Door(s).(P_Close_Outside_Door(s).S_ACK_Close_Outside_Door(s, true).Physical_Sluice(s,false, NoVacuum) + S_Break(s).S_ACK_Close_Outside_Door(s, false).Physical_Sluice(s,true,state))
 			)
 			+ S_Break(s).Physical_Sluice(s,true,state)
 		)
@@ -357,7 +367,7 @@ proc
 				+ R_ACK_Undo_Vacuum(Sluice_1, false).Controller(op, Vacuum, sluice_2_state,oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state) 
 			)
 			+ (sluice_1_state != UnknownSluice) -> (
-				S_Fix(Sluice_1).Controller(Normal,sluice_1_state, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+				R_Fix(Sluice_1).Controller(Normal,sluice_1_state, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
 			)
 			+ (oc_robot_1 == None) -> (
 				(oc_sluice_2 == None) -> (
@@ -434,9 +444,8 @@ proc
 				+ R_ACK_Undo_Vacuum(Sluice_2, false).Controller(op, sluice_1_state, Vacuum,oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state) 
 			)
 			+ (sluice_2_state != UnknownSluice) -> (
-				S_Fix(Sluice_2).Controller(Normal,sluice_1_state, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+				R_Fix(Sluice_2).Controller(Normal,sluice_1_state, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
 			)
-			+ S_Fix(Sluice_2).Controller(Normal,sluice_1_state, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
 			+ (oc_robot_1 == None) -> (
 				(oc_sluice_1 == None) -> (
 					S_Robot_Pick_Up(Robot_1, Location_InRack).Controller(op, sluice_1_state, sluice_2_state, Pre, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
@@ -518,27 +527,43 @@ proc
 
 
 init
-	allow(
-	% Only Multi-actions are allowed
-	{Open_Inside_Door, Close_Inside_Door, Open_Outside_Door, Close_Outside_Door, Create_Vacuum, 
-	Undo_Vacuum, Break, Fix, Robot_Pick_Up, Robot_Put_Down, IPU_On, IPU_Off},
-		comm(
-			{ 
-			S_Open_Inside_Door|R_Open_Inside_Door -> Open_Inside_Door,
-			S_Open_Outside_Door|R_Open_Outside_Door -> Open_Outside_Door,
-			S_Close_Inside_Door|R_Close_Inside_Door -> Close_Inside_Door,
-			S_Close_Outside_Door|R_Close_Outside_Door -> Close_Outside_Door,
-			S_Create_Vacuum|R_Create_Vacuum -> Create_Vacuum,
-			S_Undo_Vacuum|R_Undo_Vacuum -> Undo_Vacuum,
-			S_Break|R_Break -> Break,
-			S_Fix|R_Fix -> Fix,
-			S_Robot_Pick_Up|R_Robot_Pick_Up -> Robot_Pick_Up,
-			S_Robot_Put_Down|R_Robot_Put_Down -> Robot_Put_Down,
-			S_IPU_On|R_IPU_On -> IPU_On,
-			S_IPU_Off|R_IPU_Off	-> IPU_Off
-			},
-%		Physical_Sluice(Sluice_1) || Physical_Sluice(Sluice_2) || Physical_IPU(IPU_1) 
-%		|| Physical_Robot(Robot_1) || Physical_Robot(Robot_2) || Physical_Robot(Robot_3) 
-%		|| Controller(Normal, NoVacuum, NoVacuum, None, None, None, None, None, None, None, None, Off)
-		Physical_Sluice(Sluice_1, true, NoVacuum) ||  Controller(Normal, NoVacuum, NoVacuum, None, None, None, None, None, None, None, None, Off)
-	));
+	hide({Controller_Open_Inside_Door, Controller_Open_Outside_Door, Controller_Close_Inside_Door, Controller_Close_Outside_Door,
+		Controller_Create_Vacuum, Controller_Undo_Vacuum,
+		Sluice_Open_Inside_Door, Sluice_Open_Outside_Door, Sluice_Close_Inside_Door, Sluice_Close_Outside_Door,
+		Sluice_Create_Vacuum, Sluice_Undo_Vacuum},
+		allow(
+		% Only Multi-actions are allowed
+		{Controller_Open_Inside_Door, Controller_Open_Outside_Door, Controller_Close_Inside_Door, Controller_Close_Outside_Door,
+		Controller_Create_Vacuum, Controller_Undo_Vacuum,
+		Sluice_Open_Inside_Door, Sluice_Open_Outside_Door, Sluice_Close_Inside_Door, Sluice_Close_Outside_Door,
+		Sluice_Create_Vacuum, Sluice_Undo_Vacuum, P_Open_Inside_Door, P_Close_Inside_Door, P_Open_Outside_Door, P_Close_Outside_Door, P_Create_Vacuum, 
+		P_Undo_Vacuum, Break, Fix, Robot_Pick_Up, Robot_Put_Down, IPU_On, IPU_Off},
+			comm(
+				{ 
+				S_Open_Inside_Door|R_Open_Inside_Door -> Controller_Open_Inside_Door,
+				S_Open_Outside_Door|R_Open_Outside_Door -> Controller_Open_Outside_Door,
+				S_Close_Inside_Door|R_Close_Inside_Door -> Controller_Close_Inside_Door,
+				S_Close_Outside_Door|R_Close_Outside_Door -> Controller_Close_Outside_Door,
+				S_Create_Vacuum|R_Create_Vacuum -> Controller_Create_Vacuum,
+				S_Undo_Vacuum|R_Undo_Vacuum -> Controller_Undo_Vacuum,
+				S_ACK_Open_Inside_Door|R_ACK_Open_Inside_Door -> Sluice_Open_Inside_Door,
+				S_ACK_Open_Outside_Door|R_ACK_Open_Outside_Door -> Sluice_Open_Outside_Door,
+				S_ACK_Close_Inside_Door|R_ACK_Close_Inside_Door -> Sluice_Close_Inside_Door,
+				S_ACK_Close_Outside_Door|R_ACK_Close_Outside_Door -> Sluice_Close_Outside_Door,
+				S_ACK_Create_Vacuum|R_ACK_Create_Vacuum -> Sluice_Create_Vacuum,
+				S_ACK_Undo_Vacuum|R_ACK_Undo_Vacuum -> Sluice_Undo_Vacuum,
+				S_Break|R_Break -> Break,
+				S_Fix|R_Fix -> Fix,
+				S_Robot_Pick_Up|R_Robot_Pick_Up -> Robot_Pick_Up,
+				S_Robot_Put_Down|R_Robot_Put_Down -> Robot_Put_Down,
+				S_IPU_On|R_IPU_On -> IPU_On,
+				S_IPU_Off|R_IPU_Off	-> IPU_Off
+				},
+		%		Physical_Sluice(Sluice_1) || Physical_Sluice(Sluice_2) || Physical_IPU(IPU_1) 
+		%		|| Physical_Robot(Robot_1) || Physical_Robot(Robot_2) || Physical_Robot(Robot_3) 
+		%		|| Controller(Normal, NoVacuum, NoVacuum, None, None, None, None, None, None, None, None, Off)
+				Physical_Sluice(Sluice_1, false, NoVacuum) || Physical_Sluice(Sluice_2, false, NoVacuum) || Controller(Normal, NoVacuum, NoVacuum, None, None, None, None, None, None, None, None, Off)
+			)
+		)
+	)
+;
