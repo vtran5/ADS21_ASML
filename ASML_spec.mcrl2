@@ -43,24 +43,14 @@ act
 	P_Undo_Vacuum				: Sluice; 
 
 	% Disabling of Sluice Controlls
-	Break					: Sluice; % Communication of multi-action
-									  %  S_Break | R_Break
 	Fix						: Sluice; % Communication of multi-action
 									  %  S_Fix | R_Fix
 	
-	S_Break					: Sluice; % Action taken by the Controller telling the
-									  %  Sluice s to simulate a breakdown.
-									  %  Communication with R_Break(s)
-									  %  results in Break(s)
 	S_Fix					: Sluice; % Action taken by the Controller telling the
 									  %  Sluice s to simulate being fixed.
 									  %  Communication with R_Fix(s)
 									  %  results in Fix(s)
 	
-	R_Break					: Sluice; % Action taken by the Physical Sluice s to 
-									  %  Simulate it breaking down.
-									  %  Communication with S_Break(s)
-									  %  results in Break(s)
 	R_Fix					: Sluice; % Action taken by the Controller telling the
 									  %  Sluice s to simulate a breakdown.
 									  %  Communication with S_Fix(s)
@@ -216,8 +206,6 @@ proc
 			+ R_Sluice_ACK(Sluice_2, true).Controller(op, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 			+ R_Sluice_ACK(Sluice_2, false).Controller(Sluice_2_Broken,oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU) 
 
-			+ R_Break(Sluice_1).Controller(Sluice_1_Broken, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
-			+ R_Break(Sluice_2).Controller(Sluice_2_Broken, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 			+ (oc_robot_1 == None) -> (
 				(oc_sluice_1 == None) -> (
 					S_Robot_Pick_Up(Robot_1, Location_InRack).Controller(op, Pre, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
@@ -440,16 +428,15 @@ proc
 
 
 init
-%	hide({Controller_Command_Sluice, Sluice_ACK, Break, Fix, Controller_IPU_On, Controller_IPU_Off, IPU_IPU_Off, IPU_IPU_On, Occupy_Sluice, Release_Sluice},
+%	hide({Controller_Command_Sluice, Sluice_ACK, Fix, Controller_IPU_On, Controller_IPU_Off, IPU_IPU_Off, IPU_IPU_On, Occupy_Sluice, Release_Sluice},
 		allow(
 		% Only Multi-actions are allowed
 		{Controller_Command_Sluice, Sluice_ACK, P_Open_Inside_Door, P_Close_Inside_Door, P_Open_Outside_Door, P_Close_Outside_Door, P_Create_Vacuum, 
-		P_Undo_Vacuum, P_Break, P_Fix, Break, Fix, Robot_Pick_Up, Robot_Put_Down, Controller_IPU_On, Controller_IPU_Off, IPU_IPU_On, IPU_IPU_Off, P_IPU_On, P_IPU_Off, Occupy_Sluice, Release_Sluice},
+		P_Undo_Vacuum, P_Break, P_Fix, Fix, Robot_Pick_Up, Robot_Put_Down, Controller_IPU_On, Controller_IPU_Off, IPU_IPU_On, IPU_IPU_Off, P_IPU_On, P_IPU_Off, Occupy_Sluice, Release_Sluice},
 			comm(
 				{ 
 				S_Sluice_Command|R_Sluice_Command -> Controller_Command_Sluice,
 				S_Sluice_ACK|R_Sluice_ACK -> Sluice_ACK,
-				S_Break|R_Break -> Break,
 				S_Fix|R_Fix -> Fix,
 				S_Robot_Pick_Up|R_Robot_Pick_Up -> Robot_Pick_Up,
 				S_Robot_Put_Down|R_Robot_Put_Down -> Robot_Put_Down,
