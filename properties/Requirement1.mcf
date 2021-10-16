@@ -1,6 +1,0 @@
-% Doors are never open at the same time
-
-[true*.Open_Inside_Door(Sluice_1).!Close_Inside_Door(Sluice_1)*.Open_Outside_Door(Sluice_1)] false &&
-[true*.Open_Inside_Door(Sluice_1).!Close_Inside_Door(Sluice_1)*.Open_Outside_Door(Sluice_1)] false &&
-[true*.Open_Outside_Door(Sluice_2).!Close_Outside_Door(Sluice_2)*.Open_Inside_Door(Sluice_2)] false &&
-[true*.Open_Outside_Door(Sluice_2).!Close_Outside_Door(Sluice_2)*.Open_Inside_Door(Sluice_2)] false

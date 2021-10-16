@@ -452,7 +452,7 @@ proc
 
 
 init
-%	hide({Controller_Command_Sluice, Sluice_ACK, Fix, Controller_IPU, ACK_IPU, Occupy_Sluice, Release_Sluice, Robot_Pick_Up, Robot_Put_Down, ACK_Robot_Pick_Up, ACK_Robot_Put_Down},
+	hide({Controller_Command_Sluice, Sluice_ACK, Fix, Controller_IPU, ACK_IPU, Occupy_Sluice, Release_Sluice, Robot_Pick_Up, Robot_Put_Down, ACK_Robot_Pick_Up, ACK_Robot_Put_Down},
 		allow(
 		% Only Multi-actions are allowed
 		{Controller_Command_Sluice, Sluice_ACK, P_Open_Inside_Door, P_Close_Inside_Door, P_Open_Outside_Door, P_Close_Outside_Door, P_Create_Vacuum, 
@@ -479,5 +479,5 @@ init
 %				Physical_Sluice(Sluice_1, false, NoVacuum) || Physical_Sluice(Sluice_2, false, NoVacuum) || Controller(Normal, None, None, None, None, None, None, None, None)
 			)
 		)
-%	)
+	)
 ;
