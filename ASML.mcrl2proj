@@ -4,5 +4,6 @@
   <property>DeadLockFree</property>
   <property>System most eventually always move forward</property>
   <property>Doorsnotopen</property>
+  <property>Never two break after each other</property>
  </properties>
 </root>
