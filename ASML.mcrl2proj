@@ -3,5 +3,19 @@
  <properties>
   <property>DeadLockFree</property>
   <property>DoorsNotOpen</property>
+  <property>EventuallyOut</property>
+  <property>OutsideOpenForRobot1</property>
+  <property>Robot3NoIPUOn</property>
+  <property>BrokenSluiceEventuallyFixed</property>
+  <property>BrokenSluice1IsNotUsed</property>
+  <property>BrokenSluice2IsNotUsed</property>
+  <property>NoDoubleWafersSluice1</property>
+  <property>NoDoubleWafersSluice2</property>
+  <property>NoDoubleWafersInWaitRack</property>
+  <property>NoDoubleWafersOutWaitRack</property>
+  <property>NoDoubleWafersIPU</property>
+  <property>NoVacuumWhenDoorsOpen</property>
+  <property>NoOutsideOpenWithVacuum</property>
+  <property>NoInsideOpenWithoutVacuum</property>
  </properties>
 </root>

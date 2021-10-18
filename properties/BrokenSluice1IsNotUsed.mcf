@@ -1,0 +1,6 @@
+[true*.P_Break(Sluice_1).!P_Fix(Sluice_1)*.P_Robot_Pick_Up(Robot_1, Location_Sluice_1, Pre)]false
+&& [true*.P_Break(Sluice_1).!P_Fix(Sluice_1)*.P_Robot_Pick_Up(Robot_1, Location_Sluice_1, Post)]false
+&& [true*.P_Break(Sluice_1).!P_Fix(Sluice_1)*.P_Robot_Put_Down(Robot_1, Location_Sluice_1, Pre)]false
+&& [true*.P_Break(Sluice_1).!P_Fix(Sluice_1)*.P_Robot_Put_Down(Robot_1, Location_Sluice_1, Post)]false
+&& [true*.P_Break(Sluice_1).!P_Fix(Sluice_1)*.P_Robot_Put_Down(Robot_2, Location_Sluice_1, Post)]false
+&& [true*.P_Break(Sluice_1).!P_Fix(Sluice_1)*.P_Robot_Pick_Up(Robot_2, Location_Sluice_1, Pre)]false

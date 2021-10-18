@@ -1,0 +1,2 @@
+[true*.(P_Undo_Vacuum(Sluice_1)||P_Close_Outside_Door(Sluice_1)).!(P_Create_Vacuum(Sluice_1))*.P_Open_Inside_Door(Sluice_1)]false
+&& [true*.(P_Undo_Vacuum(Sluice_2)||P_Close_Outside_Door(Sluice_2)).!(P_Create_Vacuum(Sluice_2))*.P_Open_Inside_Door(Sluice_2)]false

@@ -1,0 +1,2 @@
+[true*.P_Break(Sluice_1).!P_Fix(Sluice_1)*]<true*.P_Fix(Sluice_1)>true
+&& [true*.P_Break(Sluice_2).!P_Fix(Sluice_2)*]<true*.P_Fix(Sluice_2)>true
