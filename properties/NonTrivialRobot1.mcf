@@ -1,0 +1,11 @@
+[true*](
+	<true*.P_Robot_Pick_Up(Robot_1, Location_InRack, Pre)>true
+	&& <true*.P_Robot_Pick_Up(Robot_1, Location_Sluice_1, Pre)>true
+	&& <true*.P_Robot_Pick_Up(Robot_1, Location_Sluice_2, Pre)>true
+	&& <true*.P_Robot_Pick_Up(Robot_1, Location_Sluice_1, Post)>true
+	&& <true*.P_Robot_Pick_Up(Robot_1, Location_Sluice_2, Post)>true
+	&& <true*.P_Robot_Put_Down(Robot_1, Location_Sluice_1, Pre)>true
+	&& <true*.P_Robot_Put_Down(Robot_1, Location_Sluice_2, Pre)>true
+	&& <true*.P_Robot_Put_Down(Robot_1, Location_InRack, Pre)>true
+	&& <true*.P_Robot_Put_Down(Robot_1, Location_OutRack, Post)>true
+)

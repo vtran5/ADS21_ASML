@@ -1,0 +1,8 @@
+[true*](
+	<true*.P_Robot_Pick_Up(Robot_2, Location_OutWaitRack, Post)>true
+	&& <true*.P_Robot_Pick_Up(Robot_2, Location_Sluice_1, Pre)>true
+	&& <true*.P_Robot_Pick_Up(Robot_2, Location_Sluice_2, Pre)>true
+	&& <true*.P_Robot_Put_Down(Robot_2, Location_Sluice_1, Post)>true
+	&& <true*.P_Robot_Put_Down(Robot_2, Location_Sluice_2, Post)>true
+	&& <true*.P_Robot_Put_Down(Robot_2, Location_InWaitRack, Pre)>true
+)

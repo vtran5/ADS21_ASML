@@ -22,5 +22,8 @@
   <property>NoMoreWafersOutThanIN</property>
   <property>WhenBrokenNoMoreThanThreeInTheMachine</property>
   <property>NonTrivialSluice</property>
+  <property>NonTrivialRobot1</property>
+  <property>NonTrivialRobot2</property>
+  <property>NonTrivialRobot3IPU</property>
  </properties>
 </root>
