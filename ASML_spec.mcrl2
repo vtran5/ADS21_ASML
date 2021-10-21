@@ -10,88 +10,150 @@ sort
 act
 	% Sluice Controlls
 	% Door Controlls communication (Internal)
-	S_Occupy_Sluice			: Sluice # SluiceState;
-	R_Occupy_Sluice			: Sluice # SluiceState;
-	Occupy_Sluice			: Sluice # SluiceState;
-	S_Release_Sluice		: Sluice # SluiceState;
-	R_Release_Sluice		: Sluice # SluiceState;
-	Release_Sluice			: Sluice # SluiceState;
+	S_Occupy_Sluice			: Sluice # SluiceState; % Action taken by the Controller telling
+													% 	the sluice s that it wants to interact with 
+													% 	the sluice while it is in a specific state k
+													%	communication with R_Occupy_Sluice(s, k) 
+													% 	results in Occupy_Sluice(s, k)
+	R_Occupy_Sluice			: Sluice # SluiceState; % Action taken by the sluice to receive the message 
+													% 	from the controller telling the sluice that
+													%	it will be interacted while in a specific state k
+													%	communication with S_Occupy_Sluice(s, k) 
+													% 	results in Occupy_Sluice(s, k)
+	Occupy_Sluice			: Sluice # SluiceState;	% Communication of multi-action
+													%	S_Occupy_Sluice | R_Occupy_Sluice
+	S_Release_Sluice		: Sluice # SluiceState; % Action taken by the Controller telling
+													% 	the sluice s that it will release the sluice 
+													% 	while it is in a specific state k
+													%	communication with R_Release_Sluice(s, k) 
+													% 	results in Release_Sluice(s, k)
+	R_Release_Sluice		: Sluice # SluiceState;	% Action taken by the sluice to receive the message 
+													% 	from the controller telling the sluice that
+													%	it will be released while in a specific state k
+													%	communication with S_Release_Sluice(s, k) 
+													% 	results in Release_Sluice(s, k)
+	Release_Sluice			: Sluice # SluiceState;	% Communication of multi-action
+													%	S_Release_Sluice | R_Release_Sluice
 	
 
-	Controller_Command_Sluice		: Sluice # SluiceState;
+	S_Sluice_Command			: Sluice # SluiceState;	% Action taken by the controller telling
+														% 	the sluice s that it wants the sluice to
+														%	go to specific state k
+														%	communication with R_Sluice_Command(s,k)
+														%	results in Controller_Command_Sluice(s,k)
+	R_Sluice_Command			: Sluice # SluiceState; % Action taken by the sluice to receive the message
+														% 	from the controller telling the sluice s that it 
+														% 	has to go to specific state k
+														%	communication with S_Sluice_Command(s,k)
+														%	results in Controller_Command_Sluice(s,k)
+	Controller_Command_Sluice	: Sluice # SluiceState;	% Communication of multi-action
+														%	S_Sluice_Command | R_Sluice_Command
+
 	
-	S_Sluice_Command				: Sluice # SluiceState;
-	R_Sluice_Command				: Sluice # SluiceState;
-
-
-	Sluice_ACK		: Sluice # Bool;
-	S_Sluice_ACK	: Sluice # Bool; % Action taken by the Physical Sluice s telling
-									  %  the controller that it has opened its inside door.
-	R_Sluice_ACK	: Sluice # Bool; % Action taken by the controller to receive
-									  % an acknowdlegement message from sluice s.
+	S_Sluice_ACK	: Sluice # Bool;	% Action taken by the Physical Sluice s telling
+									 	%  	the controller that it has completed the task with 
+										%	as result the Bool b
+										%	communication with R_Sluice_ACK(s,b)
+										%	results in Sluice_ACK(s,b)
+	R_Sluice_ACK	: Sluice # Bool; 	% Action taken by the controller to receive
+									  	% 	an acknowdlegement message from sluice s stating that
+										%	sluice s has completed the task with as result Bool b
+										%	communication with S_Sluice_ACK(s,b)
+										%	results in Sluice_ACK(s,b)
+	Sluice_ACK		: Sluice # Bool;	% Communication of multi-action
+										%	S_Sluice_ACK | R_Sluice_ACK
 
 	% Door Controlls (External)
-	P_Open_Inside_Door		: Sluice; % Action taken by the Physical Sluice s to
-									  % Physically open its door
-	P_Open_Outside_Door		: Sluice;
-	P_Close_Inside_Door		: Sluice;
-	P_Close_Outside_Door	: Sluice;
-	
+	P_Open_Inside_Door		: Sluice; 	% Action taken by the Physical Sluice s to
+									  	%	physically open its inside door
+	P_Open_Outside_Door		: Sluice; 	% Action taken by the Physical Sluice s to
+									  	%	physically open its outside door
+	P_Close_Inside_Door		: Sluice;	% Action taken by the Physical Sluice s to
+									  	%	physically close its inside door
+	P_Close_Outside_Door	: Sluice;	% Action taken by the Physical Sluice s to
+									  	%	physically close its outside door
 
 	% Vacuum Pump Controlls (External)
-	P_Create_Vacuum				: Sluice;
-	P_Undo_Vacuum				: Sluice; 
+	P_Create_Vacuum		: Sluice;	% Action taken by the Physical Sluice s to
+									%	make the vacuum pump create a vacuum
+	P_Undo_Vacuum		: Sluice;	% Action taken by the Physical Sluice s to
+									%	make the vacuum pump undo the vacuum
 
-	% Disabling of Sluice Controlls
-	Fix						: Sluice; % Communication of multi-action
-									  %  S_Fix | R_Fix
-	
-	S_Fix					: Sluice; % Action taken by the Controller telling the
-									  %  Sluice s to simulate being fixed.
-									  %  Communication with R_Fix(s)
-									  %  results in Fix(s)
-	
-	R_Fix					: Sluice; % Action taken by the Controller telling the
-									  %  Sluice s to simulate a breakdown.
-									  %  Communication with S_Fix(s)
-									  %  results in Fix(s)
+	% Disabling of Sluice Controlls (Internal)
+	S_Fix		: Sluice; 	% Action taken by the sluice telling the
+							%  the controller that it is fixed.
+							%  Communication with R_Fix(s)
+							%  results in Fix(s)
+	R_Fix		: Sluice; 	% Action taken by the Controller to receive the
+							%  message that sluice s has fixed itself
+							%  Communication with S_Fix(s)
+							%  results in Fix(s)
+	Fix			: Sluice; 	% Communication of multi-action
+							%  S_Fix | R_Fix
+	% Door Status (External)
+	P_Break		: Sluice;	% Action taken by the Physical Sluice s to
+							%	to simulate breaking itself
+	P_Fix		: Sluice;	% Action taken by the Physical Sluice s to
+							%	to simulate fixing itself
 
-	P_Break					: Sluice;
-	P_Fix					: Sluice;
-
-	% Robot Controlls
+	% Robot Controlls (Internal)
+	S_Robot_Pick_Up		: Robot # Location # WaferState; % Action taken by the Controller telling the
+											%  Robot r to pick up a wafer at Location l with state s
+											%  communication with R_Robot_Pick_Up(r,l,s)
+											%  results in Robot_Pick_Up(r,l,s)
+	R_Robot_Pick_Up		: Robot # Location # WaferState; % Action taken by the Physical Robot r
+											%  to pick up a wafer at Location l with state s
+											%  communication with S_Robot_Pick_Up(r,l,s)
+											%  results in Robot_Pick_Up(r,l,s)
 	Robot_Pick_Up		: Robot # Location # WaferState; % Communication of multi-action
 											%  S_Robot_Pick_Up | R_Robot_Pick_Up
+
+	S_Robot_Put_Down	: Robot # Location # WaferState; % Action taken by the Controller telling the
+											%  Robot r to put down a wafer at Location l with state s
+											%  communication with R_Robot_Put_Down(r,l,s)
+											%  results in Robot_Put_Down(r,l,s)
+	R_Robot_Put_Down	: Robot # Location # WaferState; % Action taken by the Physical Robot r
+											%  to put down a wafer at Location l with state s
+											%  communication with S_Robot_Put_Down(r,l,s)
+											%  results in Robot_Put_Down(r,l,s)
 	Robot_Put_Down		: Robot # Location # WaferState; % Communication of multi-action
 											%  S_Robot_Put_Down | R_Robot_Put_Down
+			
+	S_ACK_Robot_Pick_Up		: Robot # Location # WaferState; % Action taken by the Robot r telling
+												% 	the controller that is has completed picking up
+												%	the wafer with state s at location l
+												%	communication with R_ACK_Robot_Pick_Up(r,l,s)
+												%	results in ACK_Robot_Pick_Up(r,l,s)
+	R_ACK_Robot_Pick_Up		: Robot # Location # WaferState; % Action taken by the controller to receive
+												%	the message from the Robot r telling
+												% 	the controller that is has completed picking up
+												%	the wafer with state s at location l
+												%	communication with R_ACK_Robot_Pick_Up(r,l,s)
+												%	results in ACK_Robot_Pick_Up(r,l,s)
+	ACK_Robot_Pick_Up		: Robot # Location # WaferState; % Communication of multi-action
+												% S_ACK_Robot_Pick_Up | R_ACK_Robot_Pick_Up
 
-	S_Robot_Pick_Up		: Robot # Location # WaferState; % Action taken by the Controller telling the
-											%  Robot r to pick up a wafer at Location l.
-											%  Communication with R_Robot_Pick_Up(r,l)
-											%  results in Robot_Pick_Up
-	S_Robot_Put_Down	: Robot # Location # WaferState; % Action taken by the Controller telling the
-											%  Robot r to put down a wafer at Location l.
-											%  Communication with R_Robot_Put_Down(r,l)
-											%  results in Robot_Put_Down
 
-	R_Robot_Pick_Up		: Robot # Location # WaferState; % Action taken by the Physical Robot r
-											%  to pick up a wafer at Location l.
-											%  Communication with S_Robot_Pick_Up(r,l)
-											%  results in Robot_Pick_Up
-	R_Robot_Put_Down	: Robot # Location # WaferState; % Action taken by the Physical Robot r
-											%  to put down a wafer at Location l.
-											%  Communication with S_Robot_Put_Down(r,l)
-											%  results in Robot_Put_Down
-	ACK_Robot_Pick_Up			: Robot # Location # WaferState;
-	S_ACK_Robot_Pick_Up			: Robot # Location # WaferState;
-	R_ACK_Robot_Pick_Up			: Robot # Location # WaferState;
+	S_ACK_Robot_Put_Down	: Robot # Location # WaferState; % Action taken by the Robot r telling
+												% 	the controller that is has completed putting down
+												%	the wafer with state s at location l
+												%	communication with R_ACK_Robot_Put_Down(r,l,s)
+												%	results in ACK_Robot_Put_Down(r,l,s)
+	R_ACK_Robot_Put_Down	: Robot # Location # WaferState; % Action taken by the controller to receive
+												%	the message from the Robot r telling
+												% 	the controller that is has completed putting donw
+												%	the wafer with state s at location l
+												%	communication with R_ACK_Robot_Put_Down(r,l,s)
+												%	results in ACK_Robot_Put_Down(r,l,s)
+	ACK_Robot_Put_Down		: Robot # Location # WaferState; % Communication of multi-action
+												% S_ACK_Robot_Put_Down | R_ACK_Robot_Put_Down
 
-	ACK_Robot_Put_Down			: Robot # Location # WaferState;
-	S_ACK_Robot_Put_Down			: Robot # Location # WaferState;
-	R_ACK_Robot_Put_Down			: Robot # Location # WaferState;
+	% Robot Conrolls (External)
 
-	P_Robot_Pick_Up		: Robot # Location # WaferState;
-	P_Robot_Put_Down	: Robot # Location # WaferState;
+	P_Robot_Pick_Up		: Robot # Location # WaferState; % Action performed by the Physcical Robto r
+											% to pick up a wafer at location l with state s
+	P_Robot_Put_Down	: Robot # Location # WaferState; % Action performed by the Physcical Robto r
+											% to put down a wafer at location l with state s
 
 
 
@@ -99,28 +161,27 @@ act
 
 
 	% IPU Controlls (Internal)
-	Controller_IPU			: IPU # Bool; % Communication of multi-action
-						   %  S_IPU_On | R_IPU_On
-	
-	S_IPU		: IPU # Bool; % Action taken by the Controller telling the IPU i to turn on.
-						   %  Communication with R_IPU_On(i) results in IPU_On(i)
 
-	R_IPU		: IPU # Bool; % Action taken by the IPU i to turn on.
-						   %  Communication with S_IPU_On(i) results in IPU_On(i)
-
-	ACK_IPU			: IPU # Bool;
-
-	S_ACK_IPU		: IPU # Bool; % Action taken by the Controller telling the IPU i to turn on.
-						   %  Communication with R_IPU_On(i) results in IPU_On(i)
-
-	R_ACK_IPU		: IPU # Bool; % Action taken by the IPU i to turn on.
-						   %  Communication with S_IPU_On(i) results in IPU_On(i)
+	S_IPU			: IPU # Bool; 	% Action taken by the Controller telling the IPU i to act according
+									%	to Bool b
+						   			% 	Communication with R_IPU_On(i,b) results in IPU_On(i,b)
+	R_IPU			: IPU # Bool; 	% Action taken by the IPU i to receive the message from the
+									% 	controller to act according to Bool b
+						   			% 	Communication with S_IPU_On(i,b) results in IPU_On(i,b)
+	Controller_IPU	: IPU # Bool; 	% Communication of multi-action
+						   			% 	S_IPU_On | R_IPU_On
+	S_ACK_IPU		: IPU # Bool; 	% Action taken by the IPU telling the controller that is has acted
+									%	according to Bool b
+						   			%  	Communication with R_IPU_On(i,b) results in IPU_On(i,b)
+	R_ACK_IPU		: IPU # Bool; 	% Action taken by the Controller to receive the message from the IPU
+									%	telling that the IPU has acted according to Bool b
+						   			%  	Communication with R_IPU_On(i,b) results in IPU_On(i,b)
+	ACK_IPU			: IPU # Bool;	% Communication of multi-action
+									%	S_ACK_IPU | R_ACK_IPU
 
 	% IPU Controlls (External)
-	P_IPU_On			: IPU;
-	P_IPU_Off			: IPU;
-
-	%Need to add actions to occupy a sluice to pick and put in wafers
+	P_IPU_On			: IPU;	% Action performed by the Physical IPU to turn on
+	P_IPU_Off			: IPU; 	% Action performed by the Physical IPU to turn off
 
 
 
@@ -210,21 +271,15 @@ proc
 	% Process that represents the controller that gives commands to all the different components (Sluices, Robots and IPU)
 		(op == Normal) -> (
 		% System is in Normal Operating modus)
-			% There is No Vacuum inside Sluice_1 so the outside door can be opened or a Vacuum can be created
 			(S_Sluice_Command(Sluice_1, OutsideOpen)
 			+ S_Sluice_Command(Sluice_1, Vacuum)
-			
-			% The outside Door of Sluice_1 is currently open so it can be closed or inside the sluice there is a vacuum and that can be undone
 			+ S_Sluice_Command(Sluice_1, NoVacuum)
-			
-			% There is a Vacuum inside Sluice_1 so the inside door can be opened or the Vacuum can be undone
 			+ S_Sluice_Command(Sluice_1, InsideOpen)
 			).(
 			R_Sluice_ACK(Sluice_1, true).Controller(op, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 			+ R_Sluice_ACK(Sluice_1, false).Controller(Sluice_1_Broken,oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 			)
 
-			%Receive Signal from the sluice about state
 			+ (S_Sluice_Command(Sluice_2, OutsideOpen)
 			+ S_Sluice_Command(Sluice_2, Vacuum)
 			+ S_Sluice_Command(Sluice_2, NoVacuum)
@@ -318,7 +373,7 @@ proc
 					|| (oc_robot_2 != None && oc_robot_3 != None && oc_OutWaitRack != None) || (oc_robot_2 != None && oc_InWaitRack != None && oc_OutWaitRack != None)
 					|| (oc_robot_3 != None && oc_OutWaitRack != None && oc_InWaitRack != None)
 					)
-				) -> ( %Not already 3 Wafers in the machine and robot_2 is not trying to put a wafer away
+				) -> (
 					S_Occupy_Sluice(Sluice_2, OutsideOpen).S_Robot_Put_Down(Robot_1, Location_Sluice_2, Pre).R_ACK_Robot_Put_Down(Robot_1, Location_Sluice_2, Pre).S_Release_Sluice(Sluice_2, OutsideOpen).Controller(op, None, oc_robot_2, oc_robot_3, oc_sluice_1, Pre, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 					)
 			)
@@ -345,12 +400,9 @@ proc
 		)
 		+ (op == Sluice_2_Broken) -> (
 		% Sluice_2 of the system is broken so it cannot be opened or closed only repaired
-			% There is No Vacuum inside Sluice_1 so the outside door can be opened or a Vacuum can be created
 			(S_Sluice_Command(Sluice_1, OutsideOpen)
 			+ S_Sluice_Command(Sluice_1, Vacuum)
-			% The outside Door of Sluice_1 is currently open so it can be closed
 			+ S_Sluice_Command(Sluice_1, NoVacuum)
-			% There is a Vacuum inside Sluice_1 so the inside door can be opened or the Vacuum can be undone
 			+ S_Sluice_Command(Sluice_1, InsideOpen)
 			).(
 			R_Sluice_ACK(Sluice_1, true).Controller(op, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
@@ -386,7 +438,7 @@ proc
 					|| (oc_robot_2 != None && oc_robot_3 != None && oc_OutWaitRack != None) || (oc_robot_2 != None && oc_InWaitRack != None && oc_OutWaitRack != None)
 					|| (oc_robot_3 != None && oc_OutWaitRack != None && oc_InWaitRack != None)
 					)
-				) -> ( %Not already 3 Wafers in the machine and robot_2 is not trying to put a wafer away
+				) -> (
 					S_Occupy_Sluice(Sluice_1, OutsideOpen).S_Robot_Put_Down(Robot_1, Location_Sluice_1, Pre).R_ACK_Robot_Put_Down(Robot_1, Location_Sluice_1, Pre).S_Release_Sluice(Sluice_1, OutsideOpen).Controller(op, None, oc_robot_2, oc_robot_3, Pre, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 				)
 			)
@@ -450,13 +502,8 @@ proc
 		% IPU is not affected by the sluices breaking for its behaviour
 		+ (oc_IPU == Pre) -> (
 			S_IPU(IPU_1, true).R_ACK_IPU(IPU_1, true).S_IPU(IPU_1, false).R_ACK_IPU(IPU_1, false).Controller(op, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, Post)
-			%S_IPU(IPU_1, true).Controller(op, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, Pre)
-			%+ S_IPU(IPU_1, false).Controller(op, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, Pre)
 		)
-%		+ R_ACK_IPU(IPU_1, true).Controller(op, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, Pre)
-%		+ R_ACK_IPU(IPU_1, false).Controller(op, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, Post)
 		;
-		%.Controller(op, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 
 
 init
@@ -464,7 +511,8 @@ init
 		allow(
 		% Only Multi-actions are allowed
 		{Controller_Command_Sluice, Sluice_ACK, P_Open_Inside_Door, P_Close_Inside_Door, P_Open_Outside_Door, P_Close_Outside_Door, P_Create_Vacuum, 
-		P_Undo_Vacuum, P_Break, P_Fix, Fix, Robot_Pick_Up, Robot_Put_Down, ACK_Robot_Pick_Up, ACK_Robot_Put_Down, P_Robot_Pick_Up, P_Robot_Put_Down, Controller_IPU, ACK_IPU, P_IPU_On, P_IPU_Off, Occupy_Sluice, Release_Sluice},
+		P_Undo_Vacuum, P_Break, P_Fix, Fix, Robot_Pick_Up, Robot_Put_Down, ACK_Robot_Pick_Up, ACK_Robot_Put_Down, P_Robot_Pick_Up, P_Robot_Put_Down, 
+		Controller_IPU, ACK_IPU, P_IPU_On, P_IPU_Off, Occupy_Sluice, Release_Sluice},
 			comm(
 				{ 
 				S_Sluice_Command|R_Sluice_Command -> Controller_Command_Sluice,
