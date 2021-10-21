@@ -19,5 +19,6 @@
   <property>NoInsideOpenWithoutVacuum</property>
   <property>InsideOpenForRobot2</property>
   <property>Robot3IPUONcheck</property>
+  <property>NoMoreWafersOutThanIN</property>
  </properties>
 </root>

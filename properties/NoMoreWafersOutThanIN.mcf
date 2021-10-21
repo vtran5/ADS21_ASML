@@ -1,0 +1,8 @@
+nu X(n: Int=0).
+	[P_Robot_Pick_Up(Robot_1, Location_InRack, Pre)]X(n+1)
+	&& [P_Robot_Put_Down(Robot_1, Location_InRack, Pre)]X(n-1)
+	&& [P_Robot_Put_Down(Robot_1, Location_OutRack, Post)]X(n-1)
+	&& [!(P_Robot_Pick_Up(Robot_1, Location_InRack, Pre)
+		|| P_Robot_Put_Down(Robot_1, Location_InRack, Pre)
+		|| P_Robot_Put_Down(Robot_1, Location_OutRack, Post))]X(n)
+	&& (val(n <= 0) => [P_Robot_Put_Down(Robot_1, Location_InRack, Pre)||P_Robot_Put_Down(Robot_1, Location_OutRack, Post)]false)
