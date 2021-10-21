@@ -19,7 +19,7 @@
   <property>NoInsideOpenWithoutVacuum</property>
   <property>Robot3IPUONcheck</property>
   <property>NoMoreWafersOutThanIN</property>
-  <property>WhenBrokenNoMoreThanThreeInTheMachine</property>
+  <property>BrokenNoMoreThanThree</property>
   <property>NonTrivialSluice</property>
   <property>NonTrivialRobot1</property>
   <property>NonTrivialRobot2</property>
