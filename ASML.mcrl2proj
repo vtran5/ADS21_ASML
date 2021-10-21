@@ -20,5 +20,6 @@
   <property>InsideOpenForRobot2</property>
   <property>Robot3IPUONcheck</property>
   <property>NoMoreWafersOutThanIN</property>
+  <property>WhenBrokenNoMoreThanThreeInTheMachine</property>
  </properties>
 </root>
