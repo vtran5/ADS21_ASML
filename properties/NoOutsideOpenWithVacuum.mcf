@@ -1,2 +1,2 @@
-[true*.(P_Create_Vacuum(Sluice_1)||P_Close_Inside_Door(Sluice_1)).!(P_Undo_Vacuum(Sluice_1))*.P_Open_Outside_Door(Sluice_1)]false
-&& [true*.(P_Create_Vacuum(Sluice_2)||P_Close_Inside_Door(Sluice_2)).!(P_Undo_Vacuum(Sluice_2))*.P_Open_Outside_Door(Sluice_2)]false
+forall s : Sluice.
+	[true*.P_Create_Vacuum(s).!(P_Undo_Vacuum(s))*.P_Open_Outside_Door(s)]false

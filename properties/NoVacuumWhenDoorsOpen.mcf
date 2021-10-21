@@ -1,4 +1,3 @@
-[true*.P_Open_Outside_Door(Sluice_1).!(P_Close_Outside_Door(Sluice_1))*.(P_Create_Vacuum(Sluice_1)||P_Undo_Vacuum(Sluice_1))]false
-&& [true*.P_Open_Inside_Door(Sluice_1).!(P_Close_Inside_Door(Sluice_1))*.(P_Create_Vacuum(Sluice_1)||P_Undo_Vacuum(Sluice_1))]false
-&& [true*.P_Open_Outside_Door(Sluice_2).!(P_Close_Outside_Door(Sluice_2))*.(P_Create_Vacuum(Sluice_2)||P_Undo_Vacuum(Sluice_2))]false
-&& [true*.P_Open_Inside_Door(Sluice_2).!(P_Close_Inside_Door(Sluice_2))*.(P_Create_Vacuum(Sluice_2)||P_Undo_Vacuum(Sluice_2))]false
+forall s: Sluice.
+	[true*.P_Open_Outside_Door(s).!(P_Close_Outside_Door(s))*.(P_Create_Vacuum(s)||P_Undo_Vacuum(s))]false
+	&& [true*.P_Open_Inside_Door(s).!(P_Close_Inside_Door(s))*.(P_Create_Vacuum(s)||P_Undo_Vacuum(s))]false

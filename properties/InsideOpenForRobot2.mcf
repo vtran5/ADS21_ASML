@@ -1,4 +1,8 @@
-[true*.P_Close_Inside_Door(Sluice_1).!P_Open_Inside_Door(Sluice_1)*.P_Robot_Put_Down(Robot_2, Location_Sluice_1, Post)]false
-&& [true*.P_Close_Inside_Door(Sluice_1).!P_Open_Inside_Door(Sluice_1)*.P_Robot_Pick_Up(Robot_2, Location_Sluice_1, Pre)]false
-&& [true*.P_Close_Inside_Door(Sluice_2).!P_Open_Inside_Door(Sluice_2)*.P_Robot_Put_Down(Robot_2, Location_Sluice_2, Post)]false
-&& [true*.P_Close_Inside_Door(Sluice_2).!P_Open_Inside_Door(Sluice_2)*.P_Robot_Pick_Up(Robot_2, Location_Sluice_2, Pre)]false
+[true*.P_Close_Inside_Door(Sluice_1).!P_Open_Inside_Door(Sluice_1)*.(
+	P_Robot_Put_Down(Robot_2, Location_Sluice_1, Post)
+	|| P_Robot_Pick_Up(Robot_2, Location_Sluice_1, Pre)
+	)]false
+&& [true*.P_Close_Inside_Door(Sluice_2).!P_Open_Inside_Door(Sluice_2)*.(
+	P_Robot_Put_Down(Robot_2, Location_Sluice_2, Post)
+	|| P_Robot_Pick_Up(Robot_2, Location_Sluice_2, Pre)
+	)]false

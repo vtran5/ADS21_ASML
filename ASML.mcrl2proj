@@ -17,5 +17,7 @@
   <property>NoVacuumWhenDoorsOpen</property>
   <property>NoOutsideOpenWithVacuum</property>
   <property>NoInsideOpenWithoutVacuum</property>
+  <property>InsideOpenForRobot2</property>
+  <property>Robot3IPUONcheck</property>
  </properties>
 </root>
