@@ -301,7 +301,7 @@ proc
 					&& (
 					(oc_robot_2 != None && oc_InWaitRack != None && oc_robot_3 != None) || (oc_robot_2 != None && oc_InWaitRack != None && oc_IPU != None)
 					|| (oc_robot_2 != None && oc_IPU != None && oc_OutWaitRack != None) || (oc_InWaitRack != None && oc_IPU != None && oc_OutWaitRack != None)
-					|| (oc_robot_2 != None && oc_Robot_3 != None && oc_OutWaitRack != None) || (oc_robot_2 != None && oc_InWaitRack != None && oc_OutWaitRack != None)
+					|| (oc_robot_2 != None && oc_robot_3 != None && oc_OutWaitRack != None) || (oc_robot_2 != None && oc_InWaitRack != None && oc_OutWaitRack != None)
 					)) -> (
 					S_Occupy_Sluice(Sluice_2, OutsideOpen).S_Robot_Pick_Up(Robot_1, Location_Sluice_2, Pre).R_ACK_Robot_Pick_Up(Robot_1, Location_Sluice_2, Pre).S_Release_Sluice(Sluice_2, OutsideOpen).Controller(op, Pre, oc_robot_2, oc_robot_3, oc_sluice_1, None, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 				)
@@ -314,7 +314,7 @@ proc
 					!(
 					(oc_robot_2 != None && oc_InWaitRack != None && oc_robot_3 != None) || (oc_robot_2 != None && oc_InWaitRack != None && oc_IPU != None)
 					|| (oc_robot_2 != None && oc_IPU != None && oc_OutWaitRack != None) || (oc_InWaitRack != None && oc_IPU != None && oc_OutWaitRack != None)
-					|| (oc_robot_2 != None && oc_Robot_3 != None && oc_OutWaitRack != None) || (oc_robot_2 != None && oc_InWaitRack != None && oc_OutWaitRack != None)
+					|| (oc_robot_2 != None && oc_robot_3 != None && oc_OutWaitRack != None) || (oc_robot_2 != None && oc_InWaitRack != None && oc_OutWaitRack != None)
 					)
 				) -> ( %Not already 3 Wafers in the machine and robot_2 is not trying to put a wafer away
 					S_Occupy_Sluice(Sluice_2, OutsideOpen).S_Robot_Put_Down(Robot_1, Location_Sluice_2, Pre).R_ACK_Robot_Put_Down(Robot_1, Location_Sluice_2, Pre).S_Release_Sluice(Sluice_2, OutsideOpen).Controller(op, None, oc_robot_2, oc_robot_3, oc_sluice_1, Pre, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
@@ -367,7 +367,7 @@ proc
 					&& (
 					(oc_robot_2 != None && oc_InWaitRack != None && oc_robot_3 != None) || (oc_robot_2 != None && oc_InWaitRack != None && oc_IPU != None)
 					|| (oc_robot_2 != None && oc_IPU != None && oc_OutWaitRack != None) || (oc_InWaitRack != None && oc_IPU != None && oc_OutWaitRack != None)
-					|| (oc_robot_2 != None && oc_Robot_3 != None && oc_OutWaitRack != None) || (oc_robot_2 != None && oc_InWaitRack != None && oc_OutWaitRack != None)
+					|| (oc_robot_2 != None && oc_robot_3 != None && oc_OutWaitRack != None) || (oc_robot_2 != None && oc_InWaitRack != None && oc_OutWaitRack != None)
 					)) -> (
 					S_Occupy_Sluice(Sluice_1, OutsideOpen).S_Robot_Pick_Up(Robot_1, Location_Sluice_1, Pre).R_ACK_Robot_Pick_Up(Robot_1, Location_Sluice_1, Pre).S_Release_Sluice(Sluice_1, OutsideOpen).Controller(op, Pre, oc_robot_2, oc_robot_3, None, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 				)
@@ -380,7 +380,7 @@ proc
 					!(
 					(oc_robot_2 != None && oc_InWaitRack != None && oc_robot_3 != None) || (oc_robot_2 != None && oc_InWaitRack != None && oc_IPU != None)
 					|| (oc_robot_2 != None && oc_IPU != None && oc_OutWaitRack != None) || (oc_InWaitRack != None && oc_IPU != None && oc_OutWaitRack != None)
-					|| (oc_robot_2 != None && oc_Robot_3 != None && oc_OutWaitRack != None) || (oc_robot_2 != None && oc_InWaitRack != None && oc_OutWaitRack != None)
+					|| (oc_robot_2 != None && oc_robot_3 != None && oc_OutWaitRack != None) || (oc_robot_2 != None && oc_InWaitRack != None && oc_OutWaitRack != None)
 					)
 				) -> ( %Not already 3 Wafers in the machine and robot_2 is not trying to put a wafer away
 					S_Occupy_Sluice(Sluice_1, OutsideOpen).S_Robot_Put_Down(Robot_1, Location_Sluice_1, Pre).R_ACK_Robot_Put_Down(Robot_1, Location_Sluice_1, Pre).S_Release_Sluice(Sluice_1, OutsideOpen).Controller(op, None, oc_robot_2, oc_robot_3, Pre, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
