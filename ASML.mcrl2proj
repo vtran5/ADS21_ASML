@@ -2,7 +2,27 @@
  <spec>ASML_spec.mcrl2</spec>
  <properties>
   <property>DeadLockFree</property>
-  <property>System most eventually always move forward</property>
-  <property>Doorsnotopen</property>
+  <property>DoorsNotOpen</property>
+  <property>OutsideOpenForRobot1</property>
+  <property>InsideOpenForRobot2</property>
+  <property>Robot3NoIPUOn</property>
+  <property>BrokenSluiceEventuallyFixed</property>
+  <property>BrokenSluice1IsNotUsed</property>
+  <property>BrokenSluice2IsNotUsed</property>
+  <property>NoDoubleWafersSluice1</property>
+  <property>NoDoubleWafersSluice2</property>
+  <property>NoDoubleWafersInWaitRack</property>
+  <property>NoDoubleWafersOutWaitRack</property>
+  <property>NoDoubleWafersIPU</property>
+  <property>NoVacuumWhenDoorsOpen</property>
+  <property>NoOutsideOpenWithVacuum</property>
+  <property>NoInsideOpenWithoutVacuum</property>
+  <property>Robot3IPUONcheck</property>
+  <property>NoMoreWafersOutThanIN</property>
+  <property>WhenBrokenNoMoreThanThreeInTheMachine</property>
+  <property>NonTrivialSluice</property>
+  <property>NonTrivialRobot1</property>
+  <property>NonTrivialRobot2</property>
+  <property>NonTrivialRobot3IPU</property>
  </properties>
 </root>

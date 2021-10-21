@@ -1,462 +1,537 @@
 sort
-	Operation_Mode = struct Normal | Sluice_1_Broken | Sluice_2_Broken;
+	Operation_Mode = struct Normal | Sluice_1_Broken | Sluice_2_Broken | Sluice_12_Broken;
 	Sluice = struct Sluice_1 | Sluice_2;
 	Robot = struct Robot_1?isRobot_1 | Robot_2?isRobot_2 | Robot_3?isRobot_3;
 	IPU = struct IPU_1;
 	Location = struct Location_InRack | Location_OutRack | Location_Sluice_1 | Location_Sluice_2 | Location_InWaitRack | Location_OutWaitRack | Location_IPU;
 	SluiceState = struct InsideOpen | OutsideOpen | Vacuum | NoVacuum;
-	WaferState = struct None | Pre | Post;
-	IPUState = struct On | Off;
+	WaferState = struct None | Pre | Post | UnknownWafer;
 
 act
 	% Sluice Controlls
-	% Door Controlls
-	Open_Inside_Door		: Sluice; % Communication of multi-action
-									  %  S_Open_Inside_Door | R_Open_Inside_Door
-	Open_Outside_Door		: Sluice; % Communication of multi-action
-									  %  S_Open_Outside_Door | R_Open_Outside_Door
-	Close_Inside_Door		: Sluice; % Communication of multi-action
-									  %  S_Close_Inside_Door | R_Close_Inside_Door
-	Close_Outside_Door		: Sluice; % Communication of multi-action
-									  %  S_Close_Outside_Door | R_Close_Outside_Door
-
-	S_Open_Inside_Door		: Sluice; % Action taken by the Controller telling the
-									  %  Sluice s to open its inside door.
-									  %  Communication with R_Open_Inside_Door(s)
-									  %  results in Open_Inside_Door(s)
-	S_Open_Outside_Door 	: Sluice; % Action taken by the Controller telling the
-									  %  Sluice s to open its outside door.
-									  %  Communication with R_Open_Outside_Door(s)
-									  %  results in Open_Outside_Door(s)
-	S_Close_Inside_Door		: Sluice; % Action taken by the Controller telling the
-									  %  Sluice s to close its inside door.
-									  %  Communication with R_Close_Inside_Door(s)
-									  %  results in Close_Inside_Door(s)
-	S_Close_Outside_Door 	: Sluice; % Action taken by the Controller telling the
-									  %  Sluice s to close its outside door.
-									  %  Communication with R_Close_Outside_Door(s)
-									  %  results in Close_Outside_Door(s)
-
-
-	R_Open_Inside_Door		: Sluice; % Action taken by the Physical Sluice s to
-									  %  Open its Inside Door.
-									  %  Communication with S_Open_Inside_Door(s)
-									  %  results in Open_Inside_Door(s)
-	R_Open_Outside_Door 	: Sluice; % Action taken by the Physical Sluice s to
-									  %  Open its outside Door.
-									  %  Communication with S_Open_Outside_Door(s)
-									  %  results in Open_Outside_Door(s)
-	R_Close_Inside_Door		: Sluice; % Action taken by the Physical Sluice s to
-									  %  close its inside Door.
-									  %  Communication with S_Close_Inside_Door(s)
-									  %  results in Close_Inside_Door(s)
-	R_Close_Outside_Door 	: Sluice; % Action taken by the Physical Sluice s to
-									  %  close its inside Door.
-									  %  Communication with S_Close_Outside_Door(s)
-									  %  results in Close_Outside_Door(s)
-	% Vacuum Pump Controlls
-
-	Create_Vacuum			: Sluice; % Communication of multi-action
-									  %  S_Create_Vacuum | R_Create_Vacuum
-	Undo_Vacuum				: Sluice; % Communication of multi-action
-									  %  S_Undo_Vacuum | R_Undo_Vacuum
-
-	S_Create_Vacuum			: Sluice; % Action taken by the Controller telling the
-									  %  Sluice s to create a vacuum.
-									  %  Communication with R_Create_Vacuum(s)
-									  %  results in Create_Vacuum(s)
-	S_Undo_Vacuum			: Sluice; % Action taken by the Controller telling the
-									  %  Sluice s to undo its vacuum.
-									  %  Communication with R_Undo_Vacuum(s)
-									  %  results in Undo_Vacuum(s)
-
-	R_Create_Vacuum			: Sluice; % Action taken by the Physical Sluice s to
-									  %  create a vacuum.
-									  %  Communication with S_Create_Vacuum(s)
-									  %  results in Create_Vacuum(s)
-	R_Undo_Vacuum			: Sluice; % Action taken by the Physical Sluice s to
-									  %  undo its vacuum.
-									  %  Communication with S_Undo_Vacuum(s)
-									  %  results in Undo_Vacuum(s)
-
-	% Disabling of Sluice Controlls
-	Break					: Sluice; % Communication of multi-action
-									  %  S_Break | R_Break
-	Fix						: Sluice; % Communication of multi-action
-									  %  S_Fix | R_Fix
+	% Door Controlls communication (Internal)
+	S_Occupy_Sluice			: Sluice # SluiceState; % Action taken by the Controller telling
+													% 	the sluice s that it wants to interact with 
+													% 	the sluice while it is in a specific state k
+													%	communication with R_Occupy_Sluice(s, k) 
+													% 	results in Occupy_Sluice(s, k)
+	R_Occupy_Sluice			: Sluice # SluiceState; % Action taken by the sluice to receive the message 
+													% 	from the controller telling the sluice that
+													%	it will be interacted while in a specific state k
+													%	communication with S_Occupy_Sluice(s, k) 
+													% 	results in Occupy_Sluice(s, k)
+	Occupy_Sluice			: Sluice # SluiceState;	% Communication of multi-action
+													%	S_Occupy_Sluice | R_Occupy_Sluice
+	S_Release_Sluice		: Sluice # SluiceState; % Action taken by the Controller telling
+													% 	the sluice s that it will release the sluice 
+													% 	while it is in a specific state k
+													%	communication with R_Release_Sluice(s, k) 
+													% 	results in Release_Sluice(s, k)
+	R_Release_Sluice		: Sluice # SluiceState;	% Action taken by the sluice to receive the message 
+													% 	from the controller telling the sluice that
+													%	it will be released while in a specific state k
+													%	communication with S_Release_Sluice(s, k) 
+													% 	results in Release_Sluice(s, k)
+	Release_Sluice			: Sluice # SluiceState;	% Communication of multi-action
+													%	S_Release_Sluice | R_Release_Sluice
 	
-	S_Break					: Sluice; % Action taken by the Controller telling the
-									  %  Sluice s to simulate a breakdown.
-									  %  Communication with R_Break(s)
-									  %  results in Break(s)
-	S_Fix					: Sluice; % Action taken by the Controller telling the
-									  %  Sluice s to simulate being fixed.
-									  %  Communication with R_Fix(s)
-									  %  results in Fix(s)
-	
-	R_Break					: Sluice; % Action taken by the Physical Sluice s to 
-									  %  Simulate it breaking down.
-									  %  Communication with S_Break(s)
-									  %  results in Break(s)
-	R_Fix					: Sluice; % Action taken by the Controller telling the
-									  %  Sluice s to simulate a breakdown.
-									  %  Communication with S_Fix(s)
-									  %  results in Fix(s)
 
-	% Robot Controlls
-	Robot_Pick_Up		: Robot # Location; % Communication of multi-action
+	S_Sluice_Command			: Sluice # SluiceState;	% Action taken by the controller telling
+														% 	the sluice s that it wants the sluice to
+														%	go to specific state k
+														%	communication with R_Sluice_Command(s,k)
+														%	results in Controller_Command_Sluice(s,k)
+	R_Sluice_Command			: Sluice # SluiceState; % Action taken by the sluice to receive the message
+														% 	from the controller telling the sluice s that it 
+														% 	has to go to specific state k
+														%	communication with S_Sluice_Command(s,k)
+														%	results in Controller_Command_Sluice(s,k)
+	Controller_Command_Sluice	: Sluice # SluiceState;	% Communication of multi-action
+														%	S_Sluice_Command | R_Sluice_Command
+
+	
+	S_Sluice_ACK	: Sluice # Bool;	% Action taken by the Physical Sluice s telling
+									 	%  	the controller that it has completed the task with 
+										%	as result the Bool b
+										%	communication with R_Sluice_ACK(s,b)
+										%	results in Sluice_ACK(s,b)
+	R_Sluice_ACK	: Sluice # Bool; 	% Action taken by the controller to receive
+									  	% 	an acknowdlegement message from sluice s stating that
+										%	sluice s has completed the task with as result Bool b
+										%	communication with S_Sluice_ACK(s,b)
+										%	results in Sluice_ACK(s,b)
+	Sluice_ACK		: Sluice # Bool;	% Communication of multi-action
+										%	S_Sluice_ACK | R_Sluice_ACK
+
+	% Door Controlls (External)
+	P_Open_Inside_Door		: Sluice; 	% Action taken by the Physical Sluice s to
+									  	%	physically open its inside door
+	P_Open_Outside_Door		: Sluice; 	% Action taken by the Physical Sluice s to
+									  	%	physically open its outside door
+	P_Close_Inside_Door		: Sluice;	% Action taken by the Physical Sluice s to
+									  	%	physically close its inside door
+	P_Close_Outside_Door	: Sluice;	% Action taken by the Physical Sluice s to
+									  	%	physically close its outside door
+
+	% Vacuum Pump Controlls (External)
+	P_Create_Vacuum		: Sluice;	% Action taken by the Physical Sluice s to
+									%	make the vacuum pump create a vacuum
+	P_Undo_Vacuum		: Sluice;	% Action taken by the Physical Sluice s to
+									%	make the vacuum pump undo the vacuum
+
+	% Disabling of Sluice Controlls (Internal)
+	S_Fix		: Sluice; 	% Action taken by the sluice telling the
+							%  the controller that it is fixed.
+							%  Communication with R_Fix(s)
+							%  results in Fix(s)
+	R_Fix		: Sluice; 	% Action taken by the Controller to receive the
+							%  message that sluice s has fixed itself
+							%  Communication with S_Fix(s)
+							%  results in Fix(s)
+	Fix			: Sluice; 	% Communication of multi-action
+							%  S_Fix | R_Fix
+	% Door Status (External)
+	P_Break		: Sluice;	% Action taken by the Physical Sluice s to
+							%	to simulate breaking itself
+	P_Fix		: Sluice;	% Action taken by the Physical Sluice s to
+							%	to simulate fixing itself
+
+	% Robot Controlls (Internal)
+	S_Robot_Pick_Up		: Robot # Location # WaferState; % Action taken by the Controller telling the
+											%  Robot r to pick up a wafer at Location l with state s
+											%  communication with R_Robot_Pick_Up(r,l,s)
+											%  results in Robot_Pick_Up(r,l,s)
+	R_Robot_Pick_Up		: Robot # Location # WaferState; % Action taken by the Physical Robot r
+											%  to pick up a wafer at Location l with state s
+											%  communication with S_Robot_Pick_Up(r,l,s)
+											%  results in Robot_Pick_Up(r,l,s)
+	Robot_Pick_Up		: Robot # Location # WaferState; % Communication of multi-action
 											%  S_Robot_Pick_Up | R_Robot_Pick_Up
-	Robot_Put_Down		: Robot # Location; % Communication of multi-action
+
+	S_Robot_Put_Down	: Robot # Location # WaferState; % Action taken by the Controller telling the
+											%  Robot r to put down a wafer at Location l with state s
+											%  communication with R_Robot_Put_Down(r,l,s)
+											%  results in Robot_Put_Down(r,l,s)
+	R_Robot_Put_Down	: Robot # Location # WaferState; % Action taken by the Physical Robot r
+											%  to put down a wafer at Location l with state s
+											%  communication with S_Robot_Put_Down(r,l,s)
+											%  results in Robot_Put_Down(r,l,s)
+	Robot_Put_Down		: Robot # Location # WaferState; % Communication of multi-action
 											%  S_Robot_Put_Down | R_Robot_Put_Down
-
-	S_Robot_Pick_Up		: Robot # Location; % Action taken by the Controller telling the
-											%  Robot r to pick up a wafer at Location l.
-											%  Communication with R_Robot_Pick_Up(r,l)
-											%  results in Robot_Pick_Up
-	S_Robot_Put_Down	: Robot # Location; % Action taken by the Controller telling the
-											%  Robot r to put down a wafer at Location l.
-											%  Communication with R_Robot_Put_Down(r,l)
-											%  results in Robot_Put_Down
-
-	R_Robot_Pick_Up		: Robot # Location; % Action taken by the Physical Robot r
-											%  to pick up a wafer at Location l.
-											%  Communication with S_Robot_Pick_Up(r,l)
-											%  results in Robot_Pick_Up
-	R_Robot_Put_Down	: Robot # Location; % Action taken by the Physical Robot r
-											%  to put down a wafer at Location l.
-											%  Communication with S_Robot_Put_Down(r,l)
-											%  results in Robot_Put_Down
+			
+	S_ACK_Robot_Pick_Up		: Robot # Location # WaferState; % Action taken by the Robot r telling
+												% 	the controller that is has completed picking up
+												%	the wafer with state s at location l
+												%	communication with R_ACK_Robot_Pick_Up(r,l,s)
+												%	results in ACK_Robot_Pick_Up(r,l,s)
+	R_ACK_Robot_Pick_Up		: Robot # Location # WaferState; % Action taken by the controller to receive
+												%	the message from the Robot r telling
+												% 	the controller that is has completed picking up
+												%	the wafer with state s at location l
+												%	communication with R_ACK_Robot_Pick_Up(r,l,s)
+												%	results in ACK_Robot_Pick_Up(r,l,s)
+	ACK_Robot_Pick_Up		: Robot # Location # WaferState; % Communication of multi-action
+												% S_ACK_Robot_Pick_Up | R_ACK_Robot_Pick_Up
 
 
+	S_ACK_Robot_Put_Down	: Robot # Location # WaferState; % Action taken by the Robot r telling
+												% 	the controller that is has completed putting down
+												%	the wafer with state s at location l
+												%	communication with R_ACK_Robot_Put_Down(r,l,s)
+												%	results in ACK_Robot_Put_Down(r,l,s)
+	R_ACK_Robot_Put_Down	: Robot # Location # WaferState; % Action taken by the controller to receive
+												%	the message from the Robot r telling
+												% 	the controller that is has completed putting donw
+												%	the wafer with state s at location l
+												%	communication with R_ACK_Robot_Put_Down(r,l,s)
+												%	results in ACK_Robot_Put_Down(r,l,s)
+	ACK_Robot_Put_Down		: Robot # Location # WaferState; % Communication of multi-action
+												% S_ACK_Robot_Put_Down | R_ACK_Robot_Put_Down
+
+	% Robot Conrolls (External)
+
+	P_Robot_Pick_Up		: Robot # Location # WaferState; % Action performed by the Physcical Robto r
+											% to pick up a wafer at location l with state s
+	P_Robot_Put_Down	: Robot # Location # WaferState; % Action performed by the Physcical Robto r
+											% to put down a wafer at location l with state s
 
 
 
-	% IPU Controlls
-	IPU_On			: IPU; % Communication of multi-action
-						   %  S_IPU_On | R_IPU_On
-	IPU_Off			: IPU; % Communication of multi-action
-						   %  S_IPU_Off | R_IPU_Off
-	
-	S_IPU_On		: IPU; % Action taken by the Controller telling the IPU i to turn on.
-						   %  Communication with R_IPU_On(i) results in IPU_On(i)
-	S_IPU_Off		: IPU; % Action taken by the Controller telling the IPU i to turn off.
-						   %  Communication with R_IPU_Off(i) results in IPU_Off(i)
 
-	R_IPU_On		: IPU; % Action taken by the IPU i to turn on.
-						   %  Communication with S_IPU_On(i) results in IPU_On(i)
-	R_IPU_Off		: IPU; % Action taken by the IPU i to turn on.
-						   %  Communication with S_IPU_Off(i) results in IPU_Off(i)
+
+
+	% IPU Controlls (Internal)
+
+	S_IPU			: IPU # Bool; 	% Action taken by the Controller telling the IPU i to act according
+									%	to Bool b
+						   			% 	Communication with R_IPU_On(i,b) results in IPU_On(i,b)
+	R_IPU			: IPU # Bool; 	% Action taken by the IPU i to receive the message from the
+									% 	controller to act according to Bool b
+						   			% 	Communication with S_IPU_On(i,b) results in IPU_On(i,b)
+	Controller_IPU	: IPU # Bool; 	% Communication of multi-action
+						   			% 	S_IPU_On | R_IPU_On
+	S_ACK_IPU		: IPU # Bool; 	% Action taken by the IPU telling the controller that is has acted
+									%	according to Bool b
+						   			%  	Communication with R_IPU_On(i,b) results in IPU_On(i,b)
+	R_ACK_IPU		: IPU # Bool; 	% Action taken by the Controller to receive the message from the IPU
+									%	telling that the IPU has acted according to Bool b
+						   			%  	Communication with R_IPU_On(i,b) results in IPU_On(i,b)
+	ACK_IPU			: IPU # Bool;	% Communication of multi-action
+									%	S_ACK_IPU | R_ACK_IPU
+
+	% IPU Controlls (External)
+	P_IPU_On			: IPU;	% Action performed by the Physical IPU to turn on
+	P_IPU_Off			: IPU; 	% Action performed by the Physical IPU to turn off
+
+
 
 
 proc
-	Physical_Sluice(s: Sluice) = 
+	Physical_Sluice(s: Sluice, broken : Bool, state : SluiceState) = 
 	% Proccess that represents the Physical Sluice and the Vacuum pump associated with it
-		(
-		R_Open_Inside_Door(s)
-		+ R_Close_Inside_Door(s)
-		+ R_Open_Outside_Door(s)
-		+ R_Close_Outside_Door(s)
-		+ R_Create_Vacuum(s)
-		+ R_Undo_Vacuum(s)
-		+ R_Break(s).R_Fix(s)
-		).Physical_Sluice(s);
-
-%		(
-%		(R_Open_Inside_Door(s) + (R_Break(s).R_Fix(s))).(R_Close_Inside_Door(s) + (R_Break(s).R_Fix(s)))
-%		+ (R_Open_Outside_Door(s) + (R_Break(s).R_Fix(s))).(R_Close_Outside_Door(s) + (R_Break(s).R_Fix(s)))
-%		+ R_Create_Vacuum(s)
-%		+ R_Undo_Vacuum(s)
-%		).Physical_Sluice(s);
-
-	Physical_Robot(r : Robot) = 
-	% Process that represents the Physical Robot 
-		(
-			(r == Robot_1) -> (
-				R_Robot_Pick_Up(r, Location_InRack).(R_Robot_Put_Down(r, Location_InRack) + R_Robot_Put_Down(r, Location_Sluice_1) + R_Robot_Put_Down(r, Location_Sluice_2))
-				+ (R_Robot_Pick_Up(r, Location_Sluice_1) + R_Robot_Pick_Up(r, Location_Sluice_2)).(R_Robot_Put_Down(r, Location_InRack) + R_Robot_Put_Down(r, Location_OutRack))
+		(broken == false) -> (
+			(state == Vacuum) -> (
+				R_Sluice_Command(s, InsideOpen).(P_Open_Inside_Door(s).S_Sluice_ACK(s, true).Physical_Sluice(s, false, InsideOpen) + P_Break(s).S_Sluice_ACK(s, false).Physical_Sluice(s,true, state))
+				+ R_Sluice_Command(s, NoVacuum).P_Undo_Vacuum(s).S_Sluice_ACK(s, true).Physical_Sluice(s, false, NoVacuum)
 			)
-			+ (r == Robot_2) -> (
-				(R_Robot_Pick_Up(r, Location_Sluice_1) + R_Robot_Pick_Up(r, Location_Sluice_2)).R_Robot_Put_Down(r, Location_InWaitRack)
-				+ R_Robot_Pick_Up(r, Location_OutWaitRack).(R_Robot_Put_Down(r, Location_Sluice_1) + R_Robot_Put_Down(r, Location_Sluice_2))
+			+ (state == InsideOpen) -> (
+				R_Sluice_Command(s, Vacuum).(P_Close_Inside_Door(s).S_Sluice_ACK(s, true).Physical_Sluice(s, false, Vacuum) + P_Break(s).S_Sluice_ACK(s, false).Physical_Sluice(s,true,state))
+				+ R_Occupy_Sluice(s, state).R_Release_Sluice(s,state).Physical_Sluice(s, broken, state)
 			)
-			+ (r == Robot_3) -> (
-				R_Robot_Pick_Up(r, Location_InWaitRack).R_Robot_Put_Down(r, Location_IPU)
-				+ R_Robot_Pick_Up(r, Location_IPU).R_Robot_Put_Down(r, Location_OutWaitRack)
+			+ (state == NoVacuum) -> (
+				R_Sluice_Command(s, OutsideOpen).(P_Open_Outside_Door(s).S_Sluice_ACK(s, true).Physical_Sluice(s, false, OutsideOpen) + P_Break(s).S_Sluice_ACK(s, false).Physical_Sluice(s,true,state))
+				+ R_Sluice_Command(s, Vacuum).P_Create_Vacuum(s).S_Sluice_ACK(s,true).Physical_Sluice(s,false,Vacuum)
 			)
-		).Physical_Robot(r);
+			+ (state == OutsideOpen) -> (
+				R_Sluice_Command(s, NoVacuum).(P_Close_Outside_Door(s).S_Sluice_ACK(s, true).Physical_Sluice(s, false, NoVacuum) + P_Break(s).S_Sluice_ACK(s, false).Physical_Sluice(s,true,state))
+				+ R_Occupy_Sluice(s, state).R_Release_Sluice(s,state).Physical_Sluice(s, broken, state)
+			)
+		)
+		+ (broken == true) -> (
+			P_Fix(s).S_Fix(s).Physical_Sluice(s,false,state)
+		);
 
-	Physical_IPU(i : IPU) =
+	Physical_Robot(r : Robot, s: WaferState) = 
+	% Process that represents the Physical Robot
+		(r == Robot_1) -> (
+			(s == None) -> (
+				R_Robot_Pick_Up(r, Location_InRack, Pre).P_Robot_Pick_Up(r, Location_InRack, Pre).S_ACK_Robot_Pick_Up(r, Location_InRack, Pre).Physical_Robot(r, Pre)
+				+ R_Robot_Pick_Up(r, Location_Sluice_1, Pre).P_Robot_Pick_Up(r, Location_Sluice_1, Pre).S_ACK_Robot_Pick_Up(r, Location_Sluice_1, Pre).Physical_Robot(r, Pre)
+				+ R_Robot_Pick_Up(r, Location_Sluice_1, Post).P_Robot_Pick_Up(r, Location_Sluice_1, Post).S_ACK_Robot_Pick_Up(r, Location_Sluice_1, Post).Physical_Robot(r, Post)
+				+ R_Robot_Pick_Up(r, Location_Sluice_2, Pre).P_Robot_Pick_Up(r, Location_Sluice_2, Pre).S_ACK_Robot_Pick_Up(r, Location_Sluice_2, Pre).Physical_Robot(r, Pre)
+				+ R_Robot_Pick_Up(r, Location_Sluice_2, Post).P_Robot_Pick_Up(r, Location_Sluice_2, Post).S_ACK_Robot_Pick_Up(r, Location_Sluice_2, Post).Physical_Robot(r, Post)
+			)
+			+ (s == Pre) -> (
+				(R_Robot_Put_Down(r, Location_InRack, Pre).P_Robot_Put_Down(r, Location_InRack, Pre).S_ACK_Robot_Put_Down(r, Location_InRack, Pre) 
+				+ R_Robot_Put_Down(r, Location_Sluice_1, Pre).P_Robot_Put_Down(r, Location_Sluice_1, Pre).S_ACK_Robot_Put_Down(r, Location_Sluice_1, Pre) 
+				+ R_Robot_Put_Down(r, Location_Sluice_2, Pre).P_Robot_Put_Down(r, Location_Sluice_2, Pre).S_ACK_Robot_Put_Down(r, Location_Sluice_2, Pre)).Physical_Robot(r, None)
+			)
+			+ (s == Post) -> (
+				R_Robot_Put_Down(r, Location_OutRack, Post).P_Robot_Put_Down(r, Location_OutRack, Post).S_ACK_Robot_Put_Down(r, Location_OutRack, Post).Physical_Robot(r, None)
+			)
+		)
+		+ (r == Robot_2) -> (
+			(s == None) -> (
+				R_Robot_Pick_Up(r, Location_Sluice_1, Pre).P_Robot_Pick_Up(r, Location_Sluice_1, Pre).S_ACK_Robot_Pick_Up(r, Location_Sluice_1, Pre).Physical_Robot(r, Pre)
+				+ R_Robot_Pick_Up(r, Location_Sluice_2, Pre).P_Robot_Pick_Up(r, Location_Sluice_2, Pre).S_ACK_Robot_Pick_Up(r, Location_Sluice_2, Pre).Physical_Robot(r, Pre)
+				+ R_Robot_Pick_Up(r, Location_OutWaitRack, Post).P_Robot_Pick_Up(r, Location_OutWaitRack, Post).S_ACK_Robot_Pick_Up(r, Location_OutWaitRack, Post).Physical_Robot(r, Post)
+			)
+			+ (s == Pre) -> (
+				R_Robot_Put_Down(r, Location_InWaitRack, Pre).P_Robot_Put_Down(r, Location_InWaitRack, Pre).S_ACK_Robot_Put_Down(r, Location_InWaitRack, Pre).Physical_Robot(r, None)
+			)
+			+ (s == Post) -> (
+				(R_Robot_Put_Down(r, Location_Sluice_1, Post).P_Robot_Put_Down(r, Location_Sluice_1, Post).S_ACK_Robot_Put_Down(r, Location_Sluice_1, Post) 
+				+ R_Robot_Put_Down(r, Location_Sluice_2, Post).P_Robot_Put_Down(r, Location_Sluice_2, Post).S_ACK_Robot_Put_Down(r, Location_Sluice_2, Post)).Physical_Robot(r, None)
+			)
+		)
+		+ (r == Robot_3) -> (
+			(s == None) -> (
+				R_Robot_Pick_Up(r, Location_InWaitRack, Pre).P_Robot_Pick_Up(r, Location_InWaitRack, Pre).S_ACK_Robot_Pick_Up(r, Location_InWaitRack, Pre).Physical_Robot(r, Pre)
+				+ R_Robot_Pick_Up(r, Location_IPU, Post).P_Robot_Pick_Up(r, Location_IPU, Post).S_ACK_Robot_Pick_Up(r, Location_IPU, Post).Physical_Robot(r, Post)
+			)
+			+ (s == Pre) -> (
+				R_Robot_Put_Down(r, Location_IPU, Pre).P_Robot_Put_Down(r, Location_IPU, Pre).S_ACK_Robot_Put_Down(r, Location_IPU, Pre).Physical_Robot(r, None)
+			)
+			+ (s == Post) -> (
+				R_Robot_Put_Down(r, Location_OutWaitRack, Post).P_Robot_Put_Down(r, Location_OutWaitRack, Post).S_ACK_Robot_Put_Down(r, Location_OutWaitRack, Post).Physical_Robot(r, None)
+			)
+		);
+
+	Physical_IPU(i : IPU, TurnedOn : Bool) =
 	% Process that represents the Physical IPU
-		(
-			R_IPU_On(i).R_IPU_Off(i)
-		).Physical_IPU(i);
+		(!TurnedOn) -> (
+			R_IPU(i, true).P_IPU_On(i).S_ACK_IPU(i, true).Physical_IPU(i, true)
+		)
+		+ (TurnedOn) -> (
+			R_IPU(i, false).P_IPU_Off(i).S_ACK_IPU(i, false).Physical_IPU(i, false)
+		)
+		;
 
-	Controller(op: Operation_Mode, sluice_1_state: SluiceState, sluice_2_state: SluiceState, oc_robot_1: WaferState, oc_robot_2: WaferState, oc_robot_3: WaferState, oc_sluice_1: WaferState, oc_sluice_2: WaferState, oc_InWaitRack: WaferState, oc_OutWaitRack: WaferState, oc_IPU: WaferState, IPU_state: IPUState) = 
+	Controller(op: Operation_Mode, oc_robot_1: WaferState, oc_robot_2: WaferState, oc_robot_3: WaferState, oc_sluice_1: WaferState, oc_sluice_2: WaferState, oc_InWaitRack: WaferState, oc_OutWaitRack: WaferState, oc_IPU: WaferState) = 
 	% Process that represents the controller that gives commands to all the different components (Sluices, Robots and IPU)
 		(op == Normal) -> (
 		% System is in Normal Operating modus)
-			(sluice_1_state == NoVacuum) -> (
-			% There is No Vacuum inside Sluice_1 so the outside door can be opened or a Vacuum can be created
-				S_Open_Outside_Door(Sluice_1).Controller(op, OutsideOpen, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
-				+ S_Create_Vacuum(Sluice_1).Controller(op, Vacuum, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+			(S_Sluice_Command(Sluice_1, OutsideOpen)
+			+ S_Sluice_Command(Sluice_1, Vacuum)
+			+ S_Sluice_Command(Sluice_1, NoVacuum)
+			+ S_Sluice_Command(Sluice_1, InsideOpen)
+			).(
+			R_Sluice_ACK(Sluice_1, true).Controller(op, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
+			+ R_Sluice_ACK(Sluice_1, false).Controller(Sluice_1_Broken,oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 			)
-			+ (sluice_1_state == OutsideOpen) -> (
-			% The outside Door of Sluice_1 is currently open so it can be closed
-				S_Close_Outside_Door(Sluice_1).Controller(op, NoVacuum, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+
+			+ (S_Sluice_Command(Sluice_2, OutsideOpen)
+			+ S_Sluice_Command(Sluice_2, Vacuum)
+			+ S_Sluice_Command(Sluice_2, NoVacuum)
+			+ S_Sluice_Command(Sluice_2, InsideOpen)
+			).(
+			R_Sluice_ACK(Sluice_2, true).Controller(op, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
+			+ R_Sluice_ACK(Sluice_2, false).Controller(Sluice_2_Broken,oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 			)
-			+ (sluice_1_state == Vacuum) -> (
-			% There is a Vacuum inside Sluice_1 so the inside door can be opened or the Vacuum can be undone
-				S_Open_Inside_Door(Sluice_1).Controller(op, InsideOpen, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
-				+ S_Undo_Vacuum(Sluice_1).Controller(op, NoVacuum, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
-			)
-			+ (sluice_1_state == InsideOpen) -> (
-				S_Close_Inside_Door(Sluice_1).Controller(op, Vacuum, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
-			)
-			+(sluice_2_state == NoVacuum) -> (
-				S_Open_Outside_Door(Sluice_2).Controller(op, sluice_1_state, OutsideOpen, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
-				+ S_Create_Vacuum(Sluice_2).Controller(op, sluice_1_state, Vacuum, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
-			)
-			+ (sluice_2_state == OutsideOpen) -> (
-				S_Close_Outside_Door(Sluice_2).Controller(op, sluice_1_state, NoVacuum, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
-			)
-			+ (sluice_2_state == Vacuum) -> (
-				S_Open_Inside_Door(Sluice_2).Controller(op, sluice_1_state, InsideOpen, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
-				+ S_Undo_Vacuum(Sluice_2).Controller(op, sluice_1_state, NoVacuum, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
-			)
-			+ (sluice_2_state == InsideOpen) -> (
-				S_Close_Inside_Door(Sluice_2).Controller(op, sluice_1_state, Vacuum, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
-			)
-			+ S_Break(Sluice_1).Controller(Sluice_1_Broken, sluice_1_state, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
-			+ S_Break(Sluice_2).Controller(Sluice_2_Broken, sluice_1_state, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+
 			+ (oc_robot_1 == None) -> (
 				(oc_sluice_1 == None) -> (
-					S_Robot_Pick_Up(Robot_1, Location_InRack).Controller(op, sluice_1_state, sluice_2_state, Pre, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+					S_Robot_Pick_Up(Robot_1, Location_InRack, Pre).R_ACK_Robot_Pick_Up(Robot_1, Location_InRack, Pre).Controller(op, Pre, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 				)
-				+ (oc_sluice_2 == Post && sluice_2_state == OutsideOpen) -> (
-					S_Robot_Pick_Up(Robot_1, Location_Sluice_2).Controller(op, sluice_1_state, sluice_2_state, Post, oc_robot_2, oc_robot_3, oc_sluice_1, None, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+				+ (oc_sluice_2 == Post) -> (
+					S_Occupy_Sluice(Sluice_2, OutsideOpen).S_Robot_Pick_Up(Robot_1, Location_Sluice_2, Post).R_ACK_Robot_Pick_Up(Robot_1, Location_Sluice_2, Post).S_Release_Sluice(Sluice_2, OutsideOpen).Controller(op, Post, oc_robot_2, oc_robot_3, oc_sluice_1, None, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 				)
-				+ (oc_sluice_1 == Post && sluice_1_state == OutsideOpen) -> (
-					S_Robot_Pick_Up(Robot_1, Location_Sluice_1).Controller(op, sluice_1_state, sluice_2_state, Post, oc_robot_2, oc_robot_3, None, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+				+ (oc_sluice_1 == Post) -> (
+					S_Occupy_Sluice(Sluice_1, OutsideOpen).S_Robot_Pick_Up(Robot_1, Location_Sluice_1, Post).R_ACK_Robot_Pick_Up(Robot_1, Location_Sluice_1, Post).S_Release_Sluice(Sluice_1, OutsideOpen).Controller(op, Post, oc_robot_2, oc_robot_3, None, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
+				)
+				+ (oc_sluice_2 == Pre) -> (
+					S_Occupy_Sluice(Sluice_2, OutsideOpen).S_Robot_Pick_Up(Robot_1, Location_Sluice_2, Pre).R_ACK_Robot_Pick_Up(Robot_1, Location_Sluice_2, Pre).S_Release_Sluice(Sluice_2, OutsideOpen).Controller(op, Pre, oc_robot_2, oc_robot_3, oc_sluice_1, None, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 				)
 			)
 			+ (oc_robot_1 == Pre) -> (
 				(oc_sluice_1 != None) -> (
-					S_Robot_Put_Down(Robot_1, Location_InRack).Controller(op, sluice_1_state, sluice_2_state, None, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+					S_Robot_Put_Down(Robot_1, Location_InRack, Pre).R_ACK_Robot_Put_Down(Robot_1, Location_InRack, Pre).Controller(op, None, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 				)
-				+ (oc_sluice_1 == None && sluice_1_state == OutsideOpen) -> (
-					S_Robot_Put_Down(Robot_1, Location_Sluice_1).Controller(op, sluice_1_state, sluice_2_state, None, oc_robot_2, oc_robot_3, Pre, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+				+ (oc_sluice_1 == None) -> (
+					S_Occupy_Sluice(Sluice_1, OutsideOpen).S_Robot_Put_Down(Robot_1, Location_Sluice_1, Pre).R_ACK_Robot_Put_Down(Robot_1, Location_Sluice_1, Pre).S_Release_Sluice(Sluice_1, OutsideOpen).Controller(op, None, oc_robot_2, oc_robot_3, Pre, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 				)
 			)
 			+ (oc_robot_1 == Post) -> (
-				S_Robot_Put_Down(Robot_1, Location_OutRack).Controller(op, sluice_1_state, sluice_2_state, None, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+				S_Robot_Put_Down(Robot_1, Location_OutRack, Post).R_ACK_Robot_Put_Down(Robot_1, Location_OutRack, Post).Controller(op, None, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 			)
 			+ (oc_robot_2 == None) -> (
-				(oc_sluice_1 == Pre && sluice_1_state == InsideOpen && oc_InWaitRack == None) -> (
-					S_Robot_Pick_Up(Robot_2, Location_Sluice_1).Controller(op, sluice_1_state, sluice_2_state, oc_robot_1, Pre, oc_robot_3, None, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
-				)
-				+ (oc_sluice_2 == Pre && sluice_2_state == InsideOpen && oc_InWaitRack == None) -> (
-					S_Robot_Pick_Up(Robot_2, Location_Sluice_2).Controller(op, sluice_1_state, sluice_2_state, oc_robot_1, Pre, oc_robot_3, oc_sluice_1, None, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+				(oc_sluice_1 == Pre && oc_InWaitRack == None) -> (
+					S_Occupy_Sluice(Sluice_1, InsideOpen).S_Robot_Pick_Up(Robot_2, Location_Sluice_1, Pre).R_ACK_Robot_Pick_Up(Robot_2, Location_Sluice_1, Pre).S_Release_Sluice(Sluice_1, InsideOpen).Controller(op, oc_robot_1, Pre, oc_robot_3, None, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 				)
 				+ (oc_sluice_2 == None && oc_OutWaitRack == Post) -> (
-					S_Robot_Pick_Up(Robot_2, Location_OutWaitRack).Controller(op, sluice_1_state, sluice_2_state, oc_robot_1, Post, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, None, oc_IPU, IPU_state)
+					S_Robot_Pick_Up(Robot_2, Location_OutWaitRack, Post).R_ACK_Robot_Pick_Up(Robot_2, Location_OutWaitRack, Post).Controller(op, oc_robot_1, Post, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, None, oc_IPU)
 				)
 			)
 			+ (oc_robot_2 == Pre) -> (
 				(oc_InWaitRack == None) -> (
-					S_Robot_Put_Down(Robot_2, Location_InWaitRack).Controller(op, sluice_1_state, sluice_2_state, oc_robot_1, None, oc_robot_3, oc_sluice_1, oc_sluice_2, Pre, oc_OutWaitRack, oc_IPU, IPU_state)
+					S_Robot_Put_Down(Robot_2, Location_InWaitRack, Pre).R_ACK_Robot_Put_Down(Robot_2, Location_InWaitRack, Pre).Controller(op, oc_robot_1, None, oc_robot_3, oc_sluice_1, oc_sluice_2, Pre, oc_OutWaitRack, oc_IPU)
 				)
 			)
 			+ (oc_robot_2 == Post) -> (
-				(oc_sluice_2 == None && sluice_2_state == InsideOpen) -> (
-					S_Robot_Put_Down(Robot_2, Location_Sluice_2).Controller(op, sluice_1_state, sluice_2_state, oc_robot_1, None, oc_robot_3, oc_sluice_1, Post, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+				(oc_sluice_2 == None) -> (
+					S_Occupy_Sluice(Sluice_2, InsideOpen).S_Robot_Put_Down(Robot_2, Location_Sluice_2, Post).R_ACK_Robot_Put_Down(Robot_2, Location_Sluice_2, Post).S_Release_Sluice(Sluice_2, InsideOpen).Controller(op, oc_robot_1, None, oc_robot_3, oc_sluice_1, Post, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 				)
-			)
+			)			
 		)
 		+ (op == Sluice_1_Broken) -> (
 		% Sluice_1 of the system is broken so it cannot be opened or closed only repaired
-			(sluice_2_state == NoVacuum) -> (
-				S_Open_Outside_Door(Sluice_2).Controller(op, sluice_1_state, OutsideOpen, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
-				+ S_Create_Vacuum(Sluice_2).Controller(op, sluice_1_state, Vacuum, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+			(S_Sluice_Command(Sluice_2, OutsideOpen)
+			+ S_Sluice_Command(Sluice_2, Vacuum)
+			+ S_Sluice_Command(Sluice_2, NoVacuum)
+			+ S_Sluice_Command(Sluice_2, InsideOpen)
+			).(
+			R_Sluice_ACK(Sluice_2, true).Controller(op, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
+			+ R_Sluice_ACK(Sluice_2, false).Controller(Sluice_12_Broken,oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 			)
-			+ (sluice_2_state == OutsideOpen) -> (
-				S_Close_Outside_Door(Sluice_2).Controller(op, sluice_1_state, NoVacuum, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
-			)
-			+ (sluice_2_state == Vacuum) -> (
-				S_Open_Inside_Door(Sluice_2).Controller(op, sluice_1_state, InsideOpen, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
-				+ S_Undo_Vacuum(Sluice_2).Controller(op, sluice_1_state, NoVacuum, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
-			)
-			+ (sluice_2_state == InsideOpen) -> (
-				S_Close_Inside_Door(Sluice_2).Controller(op, sluice_1_state, Vacuum, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
-			)
-			+ S_Fix(Sluice_1).Controller(Normal,sluice_1_state, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+
+			+ R_Fix(Sluice_1).Controller(Normal, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 			+ (oc_robot_1 == None) -> (
-				(oc_sluice_2 == None) -> (
-					S_Robot_Pick_Up(Robot_1, Location_InRack).Controller(op, sluice_1_state, sluice_2_state, Pre, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+				(oc_sluice_2 == None && (oc_robot_2 == None || oc_robot_2 == Pre)  ) -> (
+					S_Robot_Pick_Up(Robot_1, Location_InRack, Pre).R_ACK_Robot_Pick_Up(Robot_1, Location_InRack, Pre).Controller(op, Pre, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 				)
-				+ (oc_sluice_2 == Post && sluice_2_state == OutsideOpen) -> (
-					S_Robot_Pick_Up(Robot_1, Location_Sluice_2).Controller(op, sluice_1_state, sluice_2_state, Post, oc_robot_2, oc_robot_3, oc_sluice_1, None, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+				+ (oc_sluice_2 == Post) -> (
+					S_Occupy_Sluice(Sluice_2, OutsideOpen).S_Robot_Pick_Up(Robot_1, Location_Sluice_2, Post).R_ACK_Robot_Pick_Up(Robot_1, Location_Sluice_2, Post).S_Release_Sluice(Sluice_2, OutsideOpen).Controller(op, Post, oc_robot_2, oc_robot_3, oc_sluice_1, None, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 				)
-				+ (oc_sluice_2 == Pre && sluice_2_state == OutsideOpen 
+				+ (oc_sluice_2 == Pre 
 					&& (
 					(oc_robot_2 != None && oc_InWaitRack != None && oc_robot_3 != None) || (oc_robot_2 != None && oc_InWaitRack != None && oc_IPU != None)
 					|| (oc_robot_2 != None && oc_IPU != None && oc_OutWaitRack != None) || (oc_InWaitRack != None && oc_IPU != None && oc_OutWaitRack != None)
+					|| (oc_robot_2 != None && oc_robot_3 != None && oc_OutWaitRack != None) || (oc_robot_2 != None && oc_InWaitRack != None && oc_OutWaitRack != None)
+					|| (oc_robot_3 != None && oc_OutWaitRack != None && oc_InWaitRack != None)
 					)) -> (
-					S_Robot_Pick_Up(Robot_1, Location_Sluice_2).Controller(op, sluice_1_state, sluice_2_state, Pre, oc_robot_2, oc_robot_3, oc_sluice_1, None, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+					S_Occupy_Sluice(Sluice_2, OutsideOpen).S_Robot_Pick_Up(Robot_1, Location_Sluice_2, Pre).R_ACK_Robot_Pick_Up(Robot_1, Location_Sluice_2, Pre).S_Release_Sluice(Sluice_2, OutsideOpen).Controller(op, Pre, oc_robot_2, oc_robot_3, oc_sluice_1, None, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 				)
 			)
 			+ (oc_robot_1 == Pre) -> (
 				(oc_sluice_2 != None) -> (
-					S_Robot_Put_Down(Robot_1, Location_InRack).Controller(op, sluice_1_state, sluice_2_state, None, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+					S_Robot_Put_Down(Robot_1, Location_InRack, Pre).R_ACK_Robot_Put_Down(Robot_1, Location_InRack, Pre).Controller(op, None, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 				)
-				+ (oc_sluice_2 == None && sluice_2_state == OutsideOpen && oc_robot_2 != Post && 
+				+ (oc_sluice_2 == None && oc_robot_2 != Post && 
 					!(
 					(oc_robot_2 != None && oc_InWaitRack != None && oc_robot_3 != None) || (oc_robot_2 != None && oc_InWaitRack != None && oc_IPU != None)
 					|| (oc_robot_2 != None && oc_IPU != None && oc_OutWaitRack != None) || (oc_InWaitRack != None && oc_IPU != None && oc_OutWaitRack != None)
+					|| (oc_robot_2 != None && oc_robot_3 != None && oc_OutWaitRack != None) || (oc_robot_2 != None && oc_InWaitRack != None && oc_OutWaitRack != None)
+					|| (oc_robot_3 != None && oc_OutWaitRack != None && oc_InWaitRack != None)
 					)
-				) -> ( %Not already 3 Wafers in the machine and robot_2 is not trying to put a wafer away
-					S_Robot_Put_Down(Robot_1, Location_Sluice_2).Controller(op, sluice_1_state, sluice_2_state, None, oc_robot_2, oc_robot_3, oc_sluice_1, Pre, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+				) -> (
+					S_Occupy_Sluice(Sluice_2, OutsideOpen).S_Robot_Put_Down(Robot_1, Location_Sluice_2, Pre).R_ACK_Robot_Put_Down(Robot_1, Location_Sluice_2, Pre).S_Release_Sluice(Sluice_2, OutsideOpen).Controller(op, None, oc_robot_2, oc_robot_3, oc_sluice_1, Pre, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 					)
 			)
 			+ (oc_robot_1 == Post) -> (
-				S_Robot_Put_Down(Robot_1, Location_OutRack).Controller(op, sluice_1_state, sluice_2_state, None, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+				S_Robot_Put_Down(Robot_1, Location_OutRack, Post).R_ACK_Robot_Put_Down(Robot_1, Location_OutRack, Post).Controller(op, None, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 			)
 			+ (oc_robot_2 == None) -> (
-				(oc_sluice_2 == Pre && sluice_2_state == InsideOpen && oc_InWaitRack == None) -> (
-					S_Robot_Pick_Up(Robot_2, Location_Sluice_2).Controller(op, sluice_1_state, sluice_2_state, oc_robot_1, Pre, oc_robot_3, oc_sluice_1, None, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+				(oc_sluice_2 == Pre && oc_InWaitRack == None) -> (
+					S_Occupy_Sluice(Sluice_2, InsideOpen).S_Robot_Pick_Up(Robot_2, Location_Sluice_2, Pre).R_ACK_Robot_Pick_Up(Robot_2, Location_Sluice_2, Pre).S_Release_Sluice(Sluice_2, InsideOpen).Controller(op, oc_robot_1, Pre, oc_robot_3, oc_sluice_1, None, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 				)
 				+ (oc_sluice_2 == None && oc_OutWaitRack == Post) -> (
-					S_Robot_Pick_Up(Robot_2, Location_OutWaitRack).Controller(op, sluice_1_state, sluice_2_state, oc_robot_1, Post, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, None, oc_IPU, IPU_state)
+					S_Robot_Pick_Up(Robot_2, Location_OutWaitRack, Post).R_ACK_Robot_Pick_Up(Robot_2, Location_OutWaitRack, Post).Controller(op, oc_robot_1, Post, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, None, oc_IPU)
 				)
 			)
 			+ (oc_robot_2 == Pre) -> (
 				(oc_InWaitRack == None) -> (
-					S_Robot_Put_Down(Robot_2, Location_InWaitRack).Controller(op, sluice_1_state, sluice_2_state, oc_robot_1, None, oc_robot_3, oc_sluice_1, oc_sluice_2, Pre, oc_OutWaitRack, oc_IPU, IPU_state)
+					S_Robot_Put_Down(Robot_2, Location_InWaitRack, Pre).R_ACK_Robot_Put_Down(Robot_2, Location_InWaitRack, Pre).Controller(op, oc_robot_1, None, oc_robot_3, oc_sluice_1, oc_sluice_2, Pre, oc_OutWaitRack, oc_IPU))
 				)
-			)
 			+ (oc_robot_2 == Post) -> (
-				(oc_sluice_2 == None && sluice_2_state == InsideOpen) -> (
-					S_Robot_Put_Down(Robot_2, Location_Sluice_2).Controller(op, sluice_1_state, sluice_2_state, oc_robot_1, None, oc_robot_3, oc_sluice_1, Post, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+				(oc_sluice_2 == None) -> (
+					S_Occupy_Sluice(Sluice_2, InsideOpen).S_Robot_Put_Down(Robot_2, Location_Sluice_2, Post).R_ACK_Robot_Put_Down(Robot_2, Location_Sluice_2, Post).S_Release_Sluice(Sluice_2, InsideOpen).Controller(op, oc_robot_1, None, oc_robot_3, oc_sluice_1, Post, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 				)
 			)
 		)
 		+ (op == Sluice_2_Broken) -> (
 		% Sluice_2 of the system is broken so it cannot be opened or closed only repaired
-			(sluice_1_state == NoVacuum) -> (
-				S_Open_Outside_Door(Sluice_1).Controller(op, OutsideOpen, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
-				+ S_Create_Vacuum(Sluice_1).Controller(op, Vacuum, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+			(S_Sluice_Command(Sluice_1, OutsideOpen)
+			+ S_Sluice_Command(Sluice_1, Vacuum)
+			+ S_Sluice_Command(Sluice_1, NoVacuum)
+			+ S_Sluice_Command(Sluice_1, InsideOpen)
+			).(
+			R_Sluice_ACK(Sluice_1, true).Controller(op, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
+			+ R_Sluice_ACK(Sluice_1, false).Controller(Sluice_12_Broken,oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 			)
-			+ (sluice_1_state == OutsideOpen) -> (
-				S_Close_Outside_Door(Sluice_1).Controller(op, NoVacuum, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
-			)
-			+ (sluice_1_state == Vacuum) -> (
-				S_Open_Inside_Door(Sluice_1).Controller(op, InsideOpen, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
-				+ S_Undo_Vacuum(Sluice_1).Controller(op, NoVacuum, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
-			)
-			+ (sluice_1_state == InsideOpen) -> (
-				S_Close_Inside_Door(Sluice_1).Controller(op, Vacuum, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
-			)
-			+ S_Fix(Sluice_2).Controller(Normal,sluice_1_state, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+
+			+ R_Fix(Sluice_2).Controller(Normal, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 			+ (oc_robot_1 == None) -> (
-				(oc_sluice_1 == None) -> (
-					S_Robot_Pick_Up(Robot_1, Location_InRack).Controller(op, sluice_1_state, sluice_2_state, Pre, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+				(oc_sluice_1 == None && (oc_robot_2 == None || oc_robot_2 == Pre)) -> (
+					S_Robot_Pick_Up(Robot_1, Location_InRack, Pre).R_ACK_Robot_Pick_Up(Robot_1, Location_InRack, Pre).Controller(op, Pre, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 				)
-				+ (oc_sluice_1 == Post && sluice_1_state == OutsideOpen) -> (
-					S_Robot_Pick_Up(Robot_1, Location_Sluice_1).Controller(op, sluice_1_state, sluice_2_state, Post, oc_robot_2, oc_robot_3, None, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+				+ (oc_sluice_1 == Post) -> (
+					S_Occupy_Sluice(Sluice_1, OutsideOpen).S_Robot_Pick_Up(Robot_1, Location_Sluice_1, Post).R_ACK_Robot_Pick_Up(Robot_1, Location_Sluice_1, Post).S_Release_Sluice(Sluice_1, OutsideOpen).Controller(op, Post, oc_robot_2, oc_robot_3, None, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 				)
-				+ (oc_sluice_1 == Pre && sluice_1_state == OutsideOpen 
+				+ (oc_sluice_1 == Pre
 					&& (
 					(oc_robot_2 != None && oc_InWaitRack != None && oc_robot_3 != None) || (oc_robot_2 != None && oc_InWaitRack != None && oc_IPU != None)
 					|| (oc_robot_2 != None && oc_IPU != None && oc_OutWaitRack != None) || (oc_InWaitRack != None && oc_IPU != None && oc_OutWaitRack != None)
+					|| (oc_robot_2 != None && oc_robot_3 != None && oc_OutWaitRack != None) || (oc_robot_2 != None && oc_InWaitRack != None && oc_OutWaitRack != None)
+					|| (oc_robot_3 != None && oc_OutWaitRack != None && oc_InWaitRack != None)
 					)) -> (
-					S_Robot_Pick_Up(Robot_1, Location_Sluice_1).Controller(op, sluice_1_state, sluice_2_state, Pre, oc_robot_2, oc_robot_3, None, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+					S_Occupy_Sluice(Sluice_1, OutsideOpen).S_Robot_Pick_Up(Robot_1, Location_Sluice_1, Pre).R_ACK_Robot_Pick_Up(Robot_1, Location_Sluice_1, Pre).S_Release_Sluice(Sluice_1, OutsideOpen).Controller(op, Pre, oc_robot_2, oc_robot_3, None, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 				)
 			)
 			+ (oc_robot_1 == Pre) -> (
 				(oc_sluice_1 != None) -> (
-					S_Robot_Put_Down(Robot_1, Location_InRack).Controller(op, sluice_1_state, sluice_2_state, None, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+					S_Robot_Put_Down(Robot_1, Location_InRack, Pre).R_ACK_Robot_Put_Down(Robot_1, Location_InRack, Pre).Controller(op, None, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 				)
-				+ (oc_sluice_1 == None && sluice_1_state == OutsideOpen && oc_robot_2 != Post && 
+				+ (oc_sluice_1 == None && oc_robot_2 != Post && 
 					!(
 					(oc_robot_2 != None && oc_InWaitRack != None && oc_robot_3 != None) || (oc_robot_2 != None && oc_InWaitRack != None && oc_IPU != None)
 					|| (oc_robot_2 != None && oc_IPU != None && oc_OutWaitRack != None) || (oc_InWaitRack != None && oc_IPU != None && oc_OutWaitRack != None)
+					|| (oc_robot_2 != None && oc_robot_3 != None && oc_OutWaitRack != None) || (oc_robot_2 != None && oc_InWaitRack != None && oc_OutWaitRack != None)
+					|| (oc_robot_3 != None && oc_OutWaitRack != None && oc_InWaitRack != None)
 					)
-				) -> ( %Not already 3 Wafers in the machine and robot_2 is not trying to put a wafer away
-					S_Robot_Put_Down(Robot_1, Location_Sluice_1).Controller(op, sluice_1_state, sluice_2_state, None, oc_robot_2, oc_robot_3, Pre, None, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+				) -> (
+					S_Occupy_Sluice(Sluice_1, OutsideOpen).S_Robot_Put_Down(Robot_1, Location_Sluice_1, Pre).R_ACK_Robot_Put_Down(Robot_1, Location_Sluice_1, Pre).S_Release_Sluice(Sluice_1, OutsideOpen).Controller(op, None, oc_robot_2, oc_robot_3, Pre, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 				)
 			)
 			+ (oc_robot_1 == Post) -> (
-				S_Robot_Put_Down(Robot_1, Location_OutRack).Controller(op, sluice_1_state, sluice_2_state, None, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+				S_Robot_Put_Down(Robot_1, Location_OutRack, Post).R_ACK_Robot_Put_Down(Robot_1, Location_OutRack, Post).Controller(op, None, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 			)
 			+ (oc_robot_2 == None) -> (
-				(oc_sluice_1 == Pre && sluice_1_state == InsideOpen && oc_InWaitRack == None) -> (
-					S_Robot_Pick_Up(Robot_2, Location_Sluice_1).Controller(op, sluice_1_state, sluice_2_state, oc_robot_1, Pre, oc_robot_3, None, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+				(oc_sluice_1 == Pre && oc_InWaitRack == None) -> (
+					S_Occupy_Sluice(Sluice_1, InsideOpen).S_Robot_Pick_Up(Robot_2, Location_Sluice_1, Pre).R_ACK_Robot_Pick_Up(Robot_2, Location_Sluice_1, Pre).S_Release_Sluice(Sluice_1, InsideOpen).Controller(op, oc_robot_1, Pre, oc_robot_3, None, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
 				)
 				+ (oc_sluice_1 == None && oc_OutWaitRack == Post) -> (
-					S_Robot_Pick_Up(Robot_2, Location_OutWaitRack).Controller(op, sluice_1_state, sluice_2_state, oc_robot_1, Post, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, None, oc_IPU, IPU_state)
+					S_Robot_Pick_Up(Robot_2, Location_OutWaitRack, Post).R_ACK_Robot_Pick_Up(Robot_2, Location_OutWaitRack, Post).Controller(op, oc_robot_1, Post, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, None, oc_IPU)
 				)
 			)
 			+ (oc_robot_2 == Pre) -> (
 				(oc_InWaitRack == None) -> (
-					S_Robot_Put_Down(Robot_2, Location_InWaitRack).Controller(op, sluice_1_state, sluice_2_state, oc_robot_1, None, oc_robot_3, oc_sluice_1, oc_sluice_2, Pre, oc_OutWaitRack, oc_IPU, IPU_state)
+					S_Robot_Put_Down(Robot_2, Location_InWaitRack, Pre).R_ACK_Robot_Put_Down(Robot_2, Location_InWaitRack, Pre).Controller(op, oc_robot_1, None, oc_robot_3, oc_sluice_1, oc_sluice_2, Pre, oc_OutWaitRack, oc_IPU)
 				)
 			)
 			+ (oc_robot_2 == Post) -> (
-				(oc_sluice_1 == None && sluice_1_state == InsideOpen) -> (
-					S_Robot_Put_Down(Robot_2, Location_Sluice_2).Controller(op, sluice_1_state, sluice_2_state, oc_robot_1, None, oc_robot_3, Post, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU, IPU_state)
+				(oc_sluice_1 == None) -> (
+					S_Occupy_Sluice(Sluice_1, InsideOpen).S_Robot_Put_Down(Robot_2, Location_Sluice_1, Post).R_ACK_Robot_Put_Down(Robot_2, Location_Sluice_1, Post).S_Release_Sluice(Sluice_1, InsideOpen).Controller(op, oc_robot_1, None, oc_robot_3, Post, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
+				)
+			)
+		)
+		+ (op == Sluice_12_Broken) -> (
+		% Sluice_1 and Sluice_2 of the system is broken so it cannot be opened or closed only repaired
+			R_Fix(Sluice_1).Controller(Sluice_2_Broken, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
+			+ R_Fix(Sluice_2).Controller(Sluice_1_Broken, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
+			+ (oc_robot_1 == Pre) -> (
+				S_Robot_Put_Down(Robot_1, Location_InRack, Pre).R_ACK_Robot_Put_Down(Robot_1, Location_InRack, Pre).Controller(op, None, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
+			)
+			+ (oc_robot_1 == Post) -> (
+				S_Robot_Put_Down(Robot_1, Location_OutRack, Post).R_ACK_Robot_Put_Down(Robot_1, Location_OutRack, Post).Controller(op, None, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, oc_IPU)
+			)
+			+ (oc_robot_2 == Pre) -> (
+				(oc_InWaitRack == None) -> (
+					S_Robot_Put_Down(Robot_2, Location_InWaitRack, Pre).R_ACK_Robot_Put_Down(Robot_2, Location_InWaitRack, Pre).Controller(op, oc_robot_1, None, oc_robot_3, oc_sluice_1, oc_sluice_2, Pre, oc_OutWaitRack, oc_IPU)
 				)
 			)
 		)
 		% Robot_3 is not affected by the sluices breaking for its behaviour
 		+ (oc_robot_3 == None) -> (
 			(oc_InWaitRack == Pre && oc_IPU == None) -> (
-				S_Robot_Pick_Up(Robot_3, Location_InWaitRack).Controller(op, sluice_1_state, sluice_2_state, oc_robot_1, oc_robot_2, Pre, oc_sluice_1, oc_sluice_2, None, oc_OutWaitRack, oc_IPU, IPU_state)
+				S_Robot_Pick_Up(Robot_3, Location_InWaitRack, Pre).R_ACK_Robot_Pick_Up(Robot_3, Location_InWaitRack, Pre).Controller(op, oc_robot_1, oc_robot_2, Pre, oc_sluice_1, oc_sluice_2, None, oc_OutWaitRack, oc_IPU)
 			)
-			+ (oc_IPU == Post && IPU_state == Off && oc_OutWaitRack == None) -> (
-				S_Robot_Pick_Up(Robot_3, Location_IPU).Controller(op, sluice_1_state, sluice_2_state, oc_robot_1, oc_robot_2, Post, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, None, IPU_state)
+			+ (oc_IPU == Post && oc_OutWaitRack == None) -> (
+				S_Robot_Pick_Up(Robot_3, Location_IPU, Post).R_ACK_Robot_Pick_Up(Robot_3, Location_IPU, Post).Controller(op, oc_robot_1, oc_robot_2, Post, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, None)
 			)
 		)
 		+ (oc_robot_3 == Pre) -> (
 			(oc_IPU == None) -> (
-				S_Robot_Put_Down(Robot_3, Location_IPU).Controller(op, sluice_1_state, sluice_2_state, oc_robot_1, oc_robot_2, None, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, Pre, IPU_state)
+				S_Robot_Put_Down(Robot_3, Location_IPU, Pre).R_ACK_Robot_Put_Down(Robot_3, Location_IPU, Pre).Controller(op, oc_robot_1, oc_robot_2, None, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, Pre)
 			)
 		)
 		+ (oc_robot_3 == Post) -> (
 			(oc_OutWaitRack == None) -> (
-				S_Robot_Put_Down(Robot_3, Location_OutWaitRack).Controller(op, sluice_1_state, sluice_2_state, oc_robot_1, oc_robot_2, None, oc_sluice_1, oc_sluice_2, oc_InWaitRack, Post, oc_IPU, IPU_state)
+				S_Robot_Put_Down(Robot_3, Location_OutWaitRack, Post).R_ACK_Robot_Put_Down(Robot_3, Location_OutWaitRack, Post).Controller(op, oc_robot_1, oc_robot_2, None, oc_sluice_1, oc_sluice_2, oc_InWaitRack, Post, oc_IPU)
 			)
 		)
 		% IPU is not affected by the sluices breaking for its behaviour
-		+ (oc_IPU == Pre && IPU_state == Off) -> (
-			S_IPU_On(IPU_1).Controller(op, sluice_1_state, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, Pre, On)
-		)
-		+ (oc_IPU == Pre && IPU_state == On) -> (
-			S_IPU_Off(IPU_1).Controller(op, sluice_1_state, sluice_2_state, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, Post, Off)
+		+ (oc_IPU == Pre) -> (
+			S_IPU(IPU_1, true).R_ACK_IPU(IPU_1, true).S_IPU(IPU_1, false).R_ACK_IPU(IPU_1, false).Controller(op, oc_robot_1, oc_robot_2, oc_robot_3, oc_sluice_1, oc_sluice_2, oc_InWaitRack, oc_OutWaitRack, Post)
 		)
 		;
 
 
-
 init
-	allow(
-	% Only Multi-actions are allowed
-	{Open_Inside_Door, Close_Inside_Door, Open_Outside_Door, Close_Outside_Door, Create_Vacuum, 
-	Undo_Vacuum, Break, Fix, Robot_Pick_Up, Robot_Put_Down, IPU_On, IPU_Off},
-		comm(
-			{ 
-			S_Open_Inside_Door|R_Open_Inside_Door -> Open_Inside_Door,
-			S_Open_Outside_Door|R_Open_Outside_Door -> Open_Outside_Door,
-			S_Close_Inside_Door|R_Close_Inside_Door -> Close_Inside_Door,
-			S_Close_Outside_Door|R_Close_Outside_Door -> Close_Outside_Door,
-			S_Create_Vacuum|R_Create_Vacuum -> Create_Vacuum,
-			S_Undo_Vacuum|R_Undo_Vacuum -> Undo_Vacuum,
-			S_Break|R_Break -> Break,
-			S_Fix|R_Fix -> Fix,
-			S_Robot_Pick_Up|R_Robot_Pick_Up -> Robot_Pick_Up,
-			S_Robot_Put_Down|R_Robot_Put_Down -> Robot_Put_Down,
-			S_IPU_On|R_IPU_On -> IPU_On,
-			S_IPU_Off|R_IPU_Off	-> IPU_Off
-			},
-		Physical_Sluice(Sluice_1) || Physical_Sluice(Sluice_2) || Physical_IPU(IPU_1) 
-		|| Physical_Robot(Robot_1) || Physical_Robot(Robot_2) || Physical_Robot(Robot_3) 
-		|| Controller(Normal, NoVacuum, NoVacuum, None, None, None, None, None, None, None, None, Off)
-	));
+	hide({Controller_Command_Sluice, Sluice_ACK, Fix, Controller_IPU, ACK_IPU, Occupy_Sluice, Release_Sluice, Robot_Pick_Up, Robot_Put_Down, ACK_Robot_Pick_Up, ACK_Robot_Put_Down},
+		allow(
+		% Only Multi-actions are allowed
+		{Controller_Command_Sluice, Sluice_ACK, P_Open_Inside_Door, P_Close_Inside_Door, P_Open_Outside_Door, P_Close_Outside_Door, P_Create_Vacuum, 
+		P_Undo_Vacuum, P_Break, P_Fix, Fix, Robot_Pick_Up, Robot_Put_Down, ACK_Robot_Pick_Up, ACK_Robot_Put_Down, P_Robot_Pick_Up, P_Robot_Put_Down, 
+		Controller_IPU, ACK_IPU, P_IPU_On, P_IPU_Off, Occupy_Sluice, Release_Sluice},
+			comm(
+				{ 
+				S_Sluice_Command|R_Sluice_Command -> Controller_Command_Sluice,
+				S_Sluice_ACK|R_Sluice_ACK -> Sluice_ACK,
+				S_Fix|R_Fix -> Fix,
+				S_Robot_Pick_Up|R_Robot_Pick_Up -> Robot_Pick_Up,
+				S_Robot_Put_Down|R_Robot_Put_Down -> Robot_Put_Down,
+				S_ACK_Robot_Pick_Up|R_ACK_Robot_Pick_Up -> ACK_Robot_Pick_Up,
+				S_ACK_Robot_Put_Down|R_ACK_Robot_Put_Down -> ACK_Robot_Put_Down,
+				S_IPU|R_IPU -> Controller_IPU,
+				S_ACK_IPU|R_ACK_IPU -> ACK_IPU,
+				S_Occupy_Sluice|R_Occupy_Sluice -> Occupy_Sluice,
+				S_Release_Sluice|R_Release_Sluice -> Release_Sluice
+				
+				},
+				Physical_Sluice(Sluice_1, false, NoVacuum) || Physical_Sluice(Sluice_2, false, NoVacuum) || Physical_IPU(IPU_1, false) 
+				|| Physical_Robot(Robot_1, None) || Physical_Robot(Robot_2, None) || Physical_Robot(Robot_3, None) 
+				|| Controller(Normal, None, None, None, None, None, None, None, None)
+			)
+		)
+	)
+;

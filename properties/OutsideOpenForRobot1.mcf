@@ -1,0 +1,10 @@
+[true*.P_Close_Outside_Door(Sluice_1).!P_Open_Outside_Door(Sluice_1)*.(
+	P_Robot_Put_Down(Robot_1, Location_Sluice_1, Pre)
+	|| P_Robot_Pick_Up(Robot_1, Location_Sluice_1, Pre)
+	|| P_Robot_Pick_Up(Robot_1, Location_Sluice_1, Post)
+)] false
+&& [true*.P_Close_Outside_Door(Sluice_2).!P_Open_Outside_Door(Sluice_2)*.(
+	P_Robot_Put_Down(Robot_1, Location_Sluice_2, Pre)
+	|| P_Robot_Pick_Up(Robot_1, Location_Sluice_2, Pre)
+	|| P_Robot_Pick_Up(Robot_1, Location_Sluice_2, Post)
+)] false

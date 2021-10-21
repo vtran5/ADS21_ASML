@@ -1,0 +1,1 @@
+[true*.P_Robot_Put_Down(Robot_2, Location_InWaitRack, Pre).!(P_Robot_Pick_Up(Robot_3, Location_InWaitRack, Pre))*.P_Robot_Put_Down(Robot_2, Location_InWaitRack, Pre)]false

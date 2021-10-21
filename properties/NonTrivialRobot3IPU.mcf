@@ -1,0 +1,8 @@
+[true*](
+	<true*.P_Robot_Pick_Up(Robot_3, Location_InWaitRack, Pre)>true
+	&& <true*.P_Robot_Pick_Up(Robot_3, Location_IPU, Post)>true
+	&& <true*.P_Robot_Put_Down(Robot_3, Location_IPU, Pre)>true
+	&& <true*.P_Robot_Put_Down(Robot_3, Location_OutWaitRack, Post)>true
+	&& <true*.P_IPU_On(IPU_1)>true
+	&& <true*.P_IPU_Off(IPU_1)>true
+)

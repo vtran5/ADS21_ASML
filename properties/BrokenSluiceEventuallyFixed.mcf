@@ -1,0 +1,2 @@
+forall s: Sluice.
+	[true*.P_Break(s).!P_Fix(s)*]<true*.P_Fix(s)>true

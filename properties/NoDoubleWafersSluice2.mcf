@@ -1,0 +1,8 @@
+[true*.P_Robot_Put_Down(Robot_1, Location_Sluice_2, Pre).!(P_Robot_Pick_Up(Robot_1, Location_Sluice_2, Pre)||P_Robot_Pick_Up(Robot_2, Location_Sluice_2, Pre))*.(
+	P_Robot_Put_Down(Robot_1, Location_Sluice_2, Pre)
+	|| P_Robot_Put_Down(Robot_2, Location_Sluice_2, Post)
+)]false
+&& [true*.P_Robot_Put_Down(Robot_2, Location_Sluice_2, Post).!(P_Robot_Pick_Up(Robot_1, Location_Sluice_2, Post)||P_Robot_Pick_Up(Robot_2, Location_Sluice_2, Post))*.(
+	P_Robot_Put_Down(Robot_1, Location_Sluice_2, Pre)
+	|| P_Robot_Put_Down(Robot_2, Location_Sluice_2, Post)
+)]false

@@ -1,0 +1,2 @@
+forall s: Sluice.
+	[true*.P_Undo_Vacuum(s).!(P_Create_Vacuum(s))*.P_Open_Inside_Door(s)]false
