@@ -1,0 +1,7 @@
+true
+
+- tool: pbes2bool
+  timing:
+    instantiation: 4.739
+    solving: 0.047
+    total: 10.699

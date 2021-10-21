@@ -17,7 +17,6 @@
   <property>NoVacuumWhenDoorsOpen</property>
   <property>NoOutsideOpenWithVacuum</property>
   <property>NoInsideOpenWithoutVacuum</property>
-  <property>Robot3IPUONcheck</property>
   <property>NoMoreWafersOutThanIN</property>
   <property>BrokenNoMoreThanThree</property>
   <property>NonTrivialSluice</property>
