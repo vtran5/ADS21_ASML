@@ -172,10 +172,10 @@ act
 						   			% 	S_IPU_On | R_IPU_On
 	S_ACK_IPU		: IPU # Bool; 	% Action taken by the IPU telling the controller that is has acted
 									%	according to Bool b
-						   			%  	Communication with R_IPU_On(i,b) results in IPU_On(i,b)
+						   			%  	Communication with S_ACK_IPU(i,b) results in ACK_IPU(i,b)
 	R_ACK_IPU		: IPU # Bool; 	% Action taken by the Controller to receive the message from the IPU
 									%	telling that the IPU has acted according to Bool b
-						   			%  	Communication with R_IPU_On(i,b) results in IPU_On(i,b)
+						   			%  	Communication with S_ACK_IPU(i,b) results in ACK_IPU(i,b)
 	ACK_IPU			: IPU # Bool;	% Communication of multi-action
 									%	S_ACK_IPU | R_ACK_IPU
 
