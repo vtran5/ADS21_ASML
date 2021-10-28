@@ -1,11 +1,11 @@
 sort
 	Operation_Mode = struct Normal | Sluice_1_Broken | Sluice_2_Broken | Sluice_12_Broken;
 	Sluice = struct Sluice_1 | Sluice_2;
-	Robot = struct Robot_1?isRobot_1 | Robot_2?isRobot_2 | Robot_3?isRobot_3;
+	Robot = struct Robot_1 | Robot_2 | Robot_3;
 	IPU = struct IPU_1;
 	Location = struct Location_InRack | Location_OutRack | Location_Sluice_1 | Location_Sluice_2 | Location_InWaitRack | Location_OutWaitRack | Location_IPU;
 	SluiceState = struct InsideOpen | OutsideOpen | Vacuum | NoVacuum;
-	WaferState = struct None | Pre | Post | UnknownWafer;
+	WaferState = struct None | Pre | Post;
 
 act
 	% Sluice Controlls
@@ -164,10 +164,10 @@ act
 
 	S_IPU			: IPU # Bool; 	% Action taken by the Controller telling the IPU i to act according
 									%	to Bool b
-						   			% 	Communication with R_IPU_On(i,b) results in IPU_On(i,b)
+						   			% 	Communication with R_IPU(i,b) results in Controller_IPU(i,b)
 	R_IPU			: IPU # Bool; 	% Action taken by the IPU i to receive the message from the
 									% 	controller to act according to Bool b
-						   			% 	Communication with S_IPU_On(i,b) results in IPU_On(i,b)
+						   			% 	Communication with S_IPU(i,b) results in Controller_IPU(i,b)
 	Controller_IPU	: IPU # Bool; 	% Communication of multi-action
 						   			% 	S_IPU_On | R_IPU_On
 	S_ACK_IPU		: IPU # Bool; 	% Action taken by the IPU telling the controller that is has acted
