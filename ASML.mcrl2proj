@@ -23,5 +23,10 @@
   <property>NonTrivialRobot1</property>
   <property>NonTrivialRobot2</property>
   <property>NonTrivialRobot3IPU</property>
+  <property>NoInsideOpenWithoutVacuumStartingPosition</property>
+  <property>ForAllOutsideOpenForRobot1</property>
+  <property>ForAllOutsideOpenRobot1Start</property>
+  <property>ForAllInsideOpenRobot2</property>
+  <property>ForAllInsideOpenRobot2Start</property>
  </properties>
 </root>

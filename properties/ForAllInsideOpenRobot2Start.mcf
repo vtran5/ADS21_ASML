@@ -1,0 +1,7 @@
+forall s: Sluice.
+	[!(P_Open_Inside_Door(s))*.(
+	P_Robot_Put_Down(Robot_2, location(s), Pre)
+	|| P_Robot_Put_Down(Robot_2, location(s), Post)
+	|| P_Robot_Pick_Up(Robot_2, location(s), Pre)
+	|| P_Robot_Pick_Up(Robot_2, location(s), Post)
+)]false

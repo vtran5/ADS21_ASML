@@ -150,9 +150,9 @@ act
 
 	% Robot Conrolls (External)
 
-	P_Robot_Pick_Up		: Robot # Location # WaferState; % Action performed by the Physcical Robto r
+	P_Robot_Pick_Up		: Robot # Location # WaferState; % Action performed by the Physcical Robot r
 											% to pick up a wafer at location l with state s
-	P_Robot_Put_Down	: Robot # Location # WaferState; % Action performed by the Physcical Robto r
+	P_Robot_Put_Down	: Robot # Location # WaferState; % Action performed by the Physcical Robot r
 											% to put down a wafer at location l with state s
 
 
@@ -182,6 +182,10 @@ act
 	% IPU Controlls (External)
 	P_IPU_On			: IPU;	% Action performed by the Physical IPU to turn on
 	P_IPU_Off			: IPU; 	% Action performed by the Physical IPU to turn off
+
+	map location: Sluice -> Location;
+	eqn location(Sluice_1) = Location_Sluice_1;
+	eqn location(Sluice_2) = Location_Sluice_2;
 
 
 
